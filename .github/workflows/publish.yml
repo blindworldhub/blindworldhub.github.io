@@ -1,0 +1,63 @@
+# Builds and publishes the Blind World Hub website.
+# It runs by itself when an app is published, changed or deleted (Releases), when Waqas opens or closes an article
+# or video issue, when the sources change, and every six hours (new YouTube videos and download counts).
+# The finished site is written to the top of the main branch, which GitHub Pages publishes.
+name: Publish website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'source/**'
+      - '.github/workflows/publish.yml'
+  release:
+    types: [published, edited, deleted, unpublished, released]
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled, deleted]
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # Issues opened by anyone else never change the site, so they do not start a build either.
+    if: github.event_name != 'issues' || github.event.issue.user.login == 'chakwalparhal2-maker'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the website
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SITE_OUT: ${{ runner.temp }}/site
+        run: python source/tools/build.py
+      - name: Put the website at the top of the repository
+        env:
+          SITE_OUT: ${{ runner.temp }}/site
+        run: |
+          set -e
+          # Everything at the top is the previous website, except the sources and this repository's own files.
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .github ! -name source ! -name README.md \
+            -exec rm -rf {} +
+          cp -r "$SITE_OUT"/. .
+          git config user.name "Blind World Hub"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "The website did not change."
+          else
+            git commit -q -m "Publish website (${{ github.event_name }})"
+            git push origin HEAD:main
+          fi
