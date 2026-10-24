@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /add-app/
+Disallow: /write/
+Disallow: /add-video/
+Sitemap: https://blindworldhub.github.io/sitemap.xml
