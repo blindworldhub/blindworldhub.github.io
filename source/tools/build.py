@@ -262,51 +262,99 @@ def load_sources():
 CHANNEL = {}
 
 
-def youtube_videos():
-    cid = CFG.get("youtubeChannelId") or ""
-    if not cid:
-        page = fetch_text(CFG["youtube"])
-        # the page's own channel (its canonical link or metadata), not channels it recommends
-        m = None
-        for pat in (r'rel="canonical" href="https://www\.youtube\.com/channel/(UC[\w-]{22})"',
-                    r'href="https://www\.youtube\.com/channel/(UC[\w-]{22})" rel="canonical"',
-                    r'<meta itemprop="(?:identifier|channelId)" content="(UC[\w-]{22})"',
-                    r'"externalId":"(UC[\w-]{22})"',
-                    r'"channelId":"(UC[\w-]{22})"'):
-            m = re.search(pat, page)
-            if m:
-                break
-        if not m:
-            raise RuntimeError("channel id not found on the channel page")
-        cid = m.group(1)
-    xml, errors = None, []
-    for attempt in range(4):  # YouTube's feed sometimes answers 404 for a while; try again, then the uploads list
-        for url in (f"https://www.youtube.com/feeds/videos.xml?channel_id={cid}",
-                    f"https://www.youtube.com/feeds/videos.xml?playlist_id=UU{cid[2:]}"):
-            try:
-                xml = fetch_text(url)
-                break
-            except Exception as e:
-                errors.append(f"{url.split('?')[1]}: {e}")
-        if xml:
-            break
-        import time
-        time.sleep(20)
-    if not xml:
-        raise RuntimeError(f"channel {cid}: " + "; ".join(errors[-2:]))
+EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D\u20E3]+")
+
+
+def clean_title(t):
+    """Video titles without emoji, which screen readers read out as words."""
+    return re.sub(r"\s{2,}", " ", EMOJI.sub(" ", t or "")).strip(" -|,") or "Video"
+
+
+def ago_to_date(text):
+    m = re.search(r"(\d+)\s*(min|h|d|w|mo|y)", (text or "").replace("minute", "min").replace("hour", "h")
+                  .replace("day", "d").replace("week", "w").replace("month", "mo").replace("year", "y"))
+    now = dt.datetime.now(dt.timezone.utc)
+    if not m:
+        return now.isoformat()
+    n, unit = int(m.group(1)), m.group(2)
+    days = {"min": n / 1440, "h": n / 24, "d": n, "w": 7 * n, "mo": 30 * n, "y": 365 * n}[unit]
+    return (now - dt.timedelta(days=days)).isoformat()
+
+
+def channel_page_videos(cid):
+    """The newest uploads, in order, from the channel's own Videos page."""
+    page = fetch_text(f"https://www.youtube.com/channel/{cid}/videos")
+    m = re.search(r"var ytInitialData = (\{.*?\});</script>", page, re.S)
+    if not m:
+        raise RuntimeError("no video data on the channel page")
+    data = json.loads(m.group(1))
+    title = re.search(r'<meta property="og:title" content="([^"]*)"', page)
+    CHANNEL.update(id=cid, title=html.unescape(title.group(1)) if title else "")
+    out = []
+
+    def walk(o):
+        if isinstance(o, dict):
+            if "lockupViewModel" in o:
+                v = o["lockupViewModel"]
+                if v.get("contentType", "").endswith("VIDEO") and v.get("contentId"):
+                    md = v.get("metadata", {}).get("lockupMetadataViewModel", {})
+                    rows = md.get("metadata", {}).get("contentMetadataViewModel", {}).get("metadataRows", [])
+                    parts = [p.get("text", {}).get("content", "") for r in rows for p in r.get("metadataParts", [])]
+                    out.append({"id": v["contentId"], "title": md.get("title", {}).get("content", ""),
+                                "date": ago_to_date(next((p for p in parts if "ago" in p), "")), "description": ""})
+                return
+            if "videoRenderer" in o:  # older page layout
+                v = o["videoRenderer"]
+                out.append({"id": v.get("videoId"), "title": "".join(r.get("text", "") for r in v.get("title", {}).get("runs", [])),
+                            "date": ago_to_date(v.get("publishedTimeText", {}).get("simpleText", "")),
+                            "description": ""})
+                return
+            for x in o.values():
+                walk(x)
+        elif isinstance(o, list):
+            for x in o:
+                walk(x)
+    walk(data)
+    if not out:
+        raise RuntimeError("no videos found on the channel page")
+    return out
+
+
+def channel_feed_videos(cid):
+    """Backup: the channel's RSS feed, which YouTube sometimes answers with 404."""
+    xml = fetch_text(f"https://www.youtube.com/feeds/videos.xml?channel_id={cid}")
     ns = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
           "m": "http://search.yahoo.com/mrss/"}
     root = ET.fromstring(xml)
     CHANNEL.update(id=cid, title=root.findtext("a:title", "", ns))
-    print(f"YouTube channel: {CHANNEL['title']} ({cid})")
-    out = []
-    for e in root.findall("a:entry", ns):
-        vid = e.findtext("yt:videoId", "", ns)
-        desc = e.findtext("m:group/m:description", "", ns) or ""
-        out.append({"id": vid, "title": e.findtext("a:title", "", ns), "date": e.findtext("a:published", "", ns),
-                    "description": desc})
+    out = [{"id": e.findtext("yt:videoId", "", ns), "title": e.findtext("a:title", "", ns),
+            "date": e.findtext("a:published", "", ns), "description": e.findtext("m:group/m:description", "", ns) or ""}
+           for e in root.findall("a:entry", ns)]
     out.sort(key=lambda v: v["date"], reverse=True)
-    return out[:int(CFG.get("latestVideos", 3))]
+    return out
+
+
+def youtube_videos():
+    cid = CFG.get("youtubeChannelId") or ""  # fixed in site.json, so only this one channel is ever used
+    if not cid:
+        page = fetch_text(CFG["youtube"])
+        m = re.search(r'rel="canonical" href="https://www\.youtube\.com/channel/(UC[\w-]{22})"', page)
+        if not m:
+            raise RuntimeError("channel id not found on the channel page")
+        cid = m.group(1)
+    errors = []
+    for get in (channel_page_videos, channel_feed_videos):
+        try:
+            vids = get(cid)
+            break
+        except Exception as e:
+            errors.append(f"{get.__name__}: {e}")
+    else:
+        raise RuntimeError(f"channel {cid}: " + "; ".join(errors))
+    print(f"YouTube channel: {CHANNEL.get('title')} ({cid})")
+    for v in vids:
+        v["title"] = clean_title(v["title"])
+    return vids[:int(CFG.get("latestVideos", 3))]
 
 
 # ---------------------------------------------------------------- apps
