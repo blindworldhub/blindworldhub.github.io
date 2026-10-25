@@ -234,6 +234,15 @@ button, .btn { cursor: pointer; }
 .app-version { font-size: 1.15rem; font-weight: 700; color: var(--muted); margin: 0 0 0.3rem; }
 .app-page .page-head .lede { margin-top: 1rem; }
 .app-body section { margin-bottom: 2.2rem; }
+.details-box { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius-m); padding: 1.3rem 1.4rem; max-width: 46em; margin-bottom: 1.6rem; }
+.details-box h2 { margin-top: 0; }
+.details { margin: 0; display: grid; gap: 0.15rem; }
+.details-row { display: grid; grid-template-columns: 8.5rem 1fr; gap: 1rem; padding: 0.45rem 0; border-top: 1px solid var(--line); }
+.details-row:first-child { border-top: 0; }
+.details dt { font-weight: 700; }
+.details dd { margin: 0; }
+.details-share { margin: 1rem 0 0; }
+.copy-link.is-done { border-color: var(--paving-deep); }
 .download-box { background: var(--surface); border: 2px solid var(--line); border-left: 8px solid var(--paving); border-radius: var(--radius-m); padding: 1.3rem 1.4rem; max-width: 46em; }
 .download-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.9rem; }
 .download-list .meta { display: block; margin-top: 0.3rem; }
@@ -296,3 +305,5 @@ button, .btn { cursor: pointer; }
 }
 .choice input[type="radio"] { width: 1.4rem; height: 1.4rem; accent-color: var(--navy); }
 :root[data-theme="dark"] .choice input[type="radio"], :root[data-contrast="high"] .choice input[type="radio"] { accent-color: var(--paving); }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
