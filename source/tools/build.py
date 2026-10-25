@@ -708,6 +708,16 @@ def meta_line(a):
     return " ".join(parts)
 
 
+def row_actions(a):
+    """Download buttons right in the list, so nobody has to open the app page first."""
+    links = [f'<a class="btn btn-primary btn-row" href="{esc(f["url"])}">Download {esc(a["label"])}, '
+             f'{file_kind(f["name"])}, {human_size(f["size"])}</a>' for f in a["files"]]
+    if a["playstore"]:
+        links.append(f'<a class="btn btn-ghost-dark btn-row" href="{esc(safe_url(a["playstore"]))}" rel="noopener">'
+                     f'Get {esc(a["name"])} on Google Play</a>')
+    return f'<p class="row-actions">{" ".join(links)}</p>' if links else ""
+
+
 def app_row(a, level=3):
     search_text = " ".join([a["name"], a["summary"], CATS[a["category"]], PLATS[a["platform"]]]).lower()
     return f"""<li class="app-row" data-cat="{a['category']}" data-plat="{a['platform']}" data-text="{esc(search_text)}">
@@ -716,6 +726,7 @@ def app_row(a, level=3):
     <h{level} class="app-row-title"><a href="{a['url']}">{esc(a['label'])}</a></h{level}>
     <p class="app-row-sum">{esc(a['summary'])}</p>
     <p class="meta">{meta_line(a)}</p>
+    {row_actions(a)}
   </div>
 </li>"""
 
