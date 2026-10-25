@@ -307,3 +307,10 @@ button, .btn { cursor: pointer; }
 :root[data-theme="dark"] .choice input[type="radio"], :root[data-contrast="high"] .choice input[type="radio"] { accent-color: var(--paving); }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.announce { background: var(--paving); color: #0f2340; border-bottom: 4px solid #0f2340; padding: 1rem 0 1.2rem; }
+.announce h2 { margin: 0 0 0.4rem; font-size: 1.2rem; color: #0f2340; }
+.announce p { margin: 0 0 0.6rem; max-width: 46em; }
+.announce a { color: #0f2340; font-weight: 700; }
+.announce .announce-close { color: #0f2340; border-color: #0f2340; min-height: 44px; }
+.announce[hidden] { display: none; }
