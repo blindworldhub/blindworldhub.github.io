@@ -635,6 +635,10 @@ def page(path, title, description, body, current=None, jsonld=None, noindex=Fals
                   for j in (jsonld or []))
     verify = (f'<meta name="google-site-verification" content="{esc(CFG["googleSiteVerification"])}">'
               if CFG.get("googleSiteVerification") else "")
+    gc = (CFG.get("goatcounter") or "").strip()
+    gc_attr = f' data-counter="https://{esc(gc)}.goatcounter.com"' if gc else ""
+    gc_script = (f'<script data-goatcounter="https://{esc(gc)}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
+                 if gc and not noindex else "")
     doc = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -664,7 +668,7 @@ def page(path, title, description, body, current=None, jsonld=None, noindex=Fals
 <script>{PREFS_JS}</script>
 {extra_head}{lds}
 </head>
-<body>
+<body{gc_attr}>
 {header(current)}
 <main id="main" tabindex="-1">
 {body}
@@ -673,6 +677,7 @@ def page(path, title, description, body, current=None, jsonld=None, noindex=Fals
 {footer()}
 <script src="/assets/js/site.js?v={ASSET_VER}" defer></script>
 {scripts}
+{gc_script}
 </body>
 </html>
 """
@@ -706,6 +711,7 @@ def meta_line(a):
              f'Uploaded by <a href="/about/">{esc(CFG["uploader"])}</a> on <time datetime="{a["updated"]:%Y-%m-%d}">{fmt_date(a["updated"])}</time>.']
     if a["downloads"]:
         parts.append(f'{plural(a["downloads"], "download")}.')
+    parts.append(f'<span class="views-inline" data-views="{esc(a["url"])}" hidden></span>')
     return " ".join(parts)
 
 
@@ -935,7 +941,11 @@ def app_page(a, apps):
     if a["developer"]:
         rows.append(("Developer", esc(a["developer"])))
     rows.append(("Uploaded by", esc(CFG["uploader"])))
+    if a["files"]:
+        rows.append(("Downloads", f'{a["downloads"]:,}'))
     details = "".join(f'<div class="details-row"><dt>{k}</dt><dd>{v}</dd></div>' for k, v in rows)
+    details += (f'<div class="details-row" data-views-row hidden><dt>Views</dt>'
+                f'<dd data-views="{esc(a["url"])}"></dd></div>')
     body = f"""<article class="app-page">
 <div class="page-head"><div class="wrap">{cr}
   <div class="app-head">{app_mark(a['name'])}<div>
