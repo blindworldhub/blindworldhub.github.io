@@ -1,0 +1,19 @@
+name: YouTube check
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/yt-debug.yml']
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir d && cd d
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+          curl -sL -A "$UA" -H "Accept-Language: en" -o videos.html -w "%{http_code}\n" "https://www.youtube.com/channel/UCpIi4JVIjYL3-cCZxPIBSgA/videos" > codes.txt
+          curl -sL -A "$UA" -o feed.xml -w "%{http_code}\n" "https://www.youtube.com/feeds/videos.xml?channel_id=UCpIi4JVIjYL3-cCZxPIBSgA" >> codes.txt
+          gzip -9 videos.html
+          git init -q -b debug && git add . && git -c user.name=bot -c user.email=bot@example.com commit -qm debug
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" debug
