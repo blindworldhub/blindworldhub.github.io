@@ -254,6 +254,9 @@ def load_sources():
     return releases, issues, videos
 
 
+CHANNEL = {}
+
+
 def youtube_videos():
     cid = CFG.get("youtubeChannelId") or ""
     if not cid:
@@ -268,7 +271,8 @@ def youtube_videos():
     ns = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
           "m": "http://search.yahoo.com/mrss/"}
     root = ET.fromstring(xml)
-    print(f"YouTube channel: {root.findtext('a:title', '', ns)} ({cid})")
+    CHANNEL.update(id=cid, title=root.findtext("a:title", "", ns))
+    print(f"YouTube channel: {CHANNEL['title']} ({cid})")
     out = []
     for e in root.findall("a:entry", ns):
         vid = e.findtext("yt:videoId", "", ns)
@@ -863,6 +867,8 @@ def videos_page(videos):
         inner = empty_note("Videos appear here as soon as they are published on the",
                            '<a href="' + esc(CFG["youtube"]) + '">YouTube channel</a>.')
     body += '<div class="wrap page-body">' + inner + "</div>"
+    if CHANNEL:
+        body += f"<!-- channel: {esc(CHANNEL['title'])} {CHANNEL['id']} -->"
     ld = {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [
         {"@type": "ListItem", "position": n + 1, "url": f"https://www.youtube.com/watch?v={v['id']}", "name": v["title"]}
         for n, v in enumerate(videos[:30])]}
