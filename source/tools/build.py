@@ -809,9 +809,9 @@ def home(apps, videos, arts):
     parts.append(f"""<section class="band band-alt" aria-labelledby="learn">
   <div class="wrap two-col">
     <div><div class="band-head"><h2 id="learn">Guides</h2><a class="more" href="/guides/">All guides</a></div>
-      <ul class="article-list">{''.join(article_row(a, 'guide') for a in arts['guide'][:3])}</ul></div>
+      {('<ul class="article-list">' + ''.join(article_row(a, 'guide') for a in arts['guide'][:3]) + '</ul>') if arts['guide'] else empty_note('New guides are on their way.')}</div>
     <div><div class="band-head"><h2 id="news-h">News</h2><a class="more" href="/news/">All news</a></div>
-      <ul class="article-list">{''.join(article_row(a, 'news') for a in arts['news'][:3])}</ul></div>
+      {('<ul class="article-list">' + ''.join(article_row(a, 'news') for a in arts['news'][:3]) + '</ul>') if arts['news'] else empty_note('News is on its way.')}</div>
   </div>
 </section>""")
     parts.append(community_band())
@@ -894,7 +894,7 @@ def app_page(a, apps):
         dl.append(f'<li><a href="{esc(safe_url(a["virustotal"]))}" rel="noopener">Virus scan report on VirusTotal</a></li>')
     install = ""
     if a["platform"] == "android" and a["files"]:
-        install = '<p class="hint">New to APK files? Read <a href="/guides/how-to-install-an-apk-file-on-android/">How to install an APK file on Android</a> and <a href="/guides/how-to-check-an-app-for-viruses-with-virustotal/">how to check an app for viruses</a>.</p>'
+        install = ''
     older = [v for v in a["versions"] if v["version"] != a["version"] or v["files"] != a["files"]][:20] if len(a["versions"]) > 1 else []
     older_html = ""
     if older:

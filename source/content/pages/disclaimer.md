@@ -1,7 +1,7 @@
 title: Disclaimer and copyright
 description: Apps on Blind World Hub are shared as they are. Owners who want an app removed can contact us.
 ---
-Apps and files on Blind World Hub are shared as they are, without any warranty. Blind World Hub is not responsible for any damage or data loss caused by installing or using them. We recommend checking every file with [VirusTotal](https://www.virustotal.com) before you install it; see the guide [How to check an app for viruses with VirusTotal](/guides/how-to-check-an-app-for-viruses-with-virustotal/).
+Apps and files on Blind World Hub are shared as they are, without any warranty. Blind World Hub is not responsible for any damage or data loss caused by installing or using them. We recommend checking every file with [VirusTotal](https://www.virustotal.com) before you install it.
 
 ## Copyright
 
