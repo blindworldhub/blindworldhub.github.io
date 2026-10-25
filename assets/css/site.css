@@ -188,6 +188,8 @@ button, .btn { cursor: pointer; }
 .app-row-title { margin: 0 0 0.2rem; font-size: 1.15rem; }
 .app-row-title a { color: var(--ink); text-decoration-color: var(--paving-deep); }
 .app-row-sum { margin: 0 0 0.3rem; max-width: 36em; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.7rem 0 0; }
+.btn-row { border-radius: var(--radius-m); justify-content: flex-start; text-align: left; min-height: 44px; padding: 0.55rem 1rem; }
 .rank-list { margin: 0; padding-left: 1.6rem; display: grid; gap: 0.5rem; }
 .rank-list li::marker { font-weight: 700; color: var(--muted); }
 
