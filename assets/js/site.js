@@ -264,4 +264,32 @@
       });
     });
   });
+
+  // View counts from GoatCounter, when the site has a counter
+  var counter = document.body.getAttribute("data-counter");
+  var viewEls = document.querySelectorAll("[data-views]");
+  if (counter && viewEls.length && window.fetch) {
+    var asked = {};
+    Array.prototype.forEach.call(viewEls, function (el) {
+      var path = el.getAttribute("data-views");
+      if (!asked[path]) {
+        asked[path] = fetch(counter + "/counter/" + encodeURI(path) + ".json")
+          .then(function (r) { return r.status === 404 ? { count: "0" } : (r.ok ? r.json() : null); })
+          .catch(function () { return null; });
+      }
+      asked[path].then(function (d) {
+        if (!d || d.count == null) return;
+        var n = String(d.count).trim();
+        var one = n === "1";
+        if (el.classList.contains("views-inline")) {
+          el.textContent = n + (one ? " view." : " views.");
+        } else {
+          el.textContent = n;
+          var row = el.closest("[data-views-row]");
+          if (row) row.hidden = false;
+        }
+        el.hidden = false;
+      });
+    });
+  }
 })();
