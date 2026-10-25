@@ -279,7 +279,21 @@ def youtube_videos():
         if not m:
             raise RuntimeError("channel id not found on the channel page")
         cid = m.group(1)
-    xml = fetch_text(f"https://www.youtube.com/feeds/videos.xml?channel_id={cid}")
+    xml, errors = None, []
+    for attempt in range(4):  # YouTube's feed sometimes answers 404 for a while; try again, then the uploads list
+        for url in (f"https://www.youtube.com/feeds/videos.xml?channel_id={cid}",
+                    f"https://www.youtube.com/feeds/videos.xml?playlist_id=UU{cid[2:]}"):
+            try:
+                xml = fetch_text(url)
+                break
+            except Exception as e:
+                errors.append(f"{url.split('?')[1]}: {e}")
+        if xml:
+            break
+        import time
+        time.sleep(20)
+    if not xml:
+        raise RuntimeError(f"channel {cid}: " + "; ".join(errors[-2:]))
     ns = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
           "m": "http://search.yahoo.com/mrss/"}
     root = ET.fromstring(xml)
