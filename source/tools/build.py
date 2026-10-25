@@ -258,8 +258,9 @@ def youtube_videos():
     cid = CFG.get("youtubeChannelId") or ""
     if not cid:
         page = fetch_text(CFG["youtube"])
-        m = re.search(r'"(?:channelId|externalId)":"(UC[\w-]{22})"', page) or re.search(
-            r"youtube\.com/channel/(UC[\w-]{22})", page)
+        # the page's own channel: its canonical link, not channels it recommends
+        m = (re.search(r'<link rel="canonical" href="https://www\.youtube\.com/channel/(UC[\w-]{22})"', page)
+             or re.search(r'"externalId":"(UC[\w-]{22})"', page))
         if not m:
             raise RuntimeError("channel id not found on the channel page")
         cid = m.group(1)
@@ -267,13 +268,15 @@ def youtube_videos():
     ns = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
           "m": "http://search.yahoo.com/mrss/"}
     root = ET.fromstring(xml)
+    print(f"YouTube channel: {root.findtext('a:title', '', ns)} ({cid})")
     out = []
     for e in root.findall("a:entry", ns):
         vid = e.findtext("yt:videoId", "", ns)
         desc = e.findtext("m:group/m:description", "", ns) or ""
         out.append({"id": vid, "title": e.findtext("a:title", "", ns), "date": e.findtext("a:published", "", ns),
                     "description": desc})
-    return out
+    out.sort(key=lambda v: v["date"], reverse=True)
+    return out[:int(CFG.get("latestVideos", 3))]
 
 
 # ---------------------------------------------------------------- apps
@@ -702,7 +705,7 @@ def home(apps, videos, arts):
     <ol class="rank-list">{''.join(f'<li><a href="{a["url"]}">{esc(a["label"])}</a> <span class="meta">{plural(a["downloads"], "download")}</span></li>' for a in popular)}</ol>
   </div>
 </section>""")
-    vids = videos[:6]
+    vids = videos[:int(CFG.get("latestVideos", 3))]
     parts.append(f"""<section class="band" aria-labelledby="latest-videos">
   <div class="wrap">
     <div class="band-head"><h2 id="latest-videos">Latest videos</h2><a class="more" href="/videos/">All videos</a></div>
