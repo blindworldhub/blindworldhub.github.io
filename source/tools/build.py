@@ -251,6 +251,11 @@ def load_sources():
         videos = youtube_videos()
     except Exception as e:
         warnings.append(f"YouTube videos could not be read: {e}")
+        try:  # keep the videos of the last good build
+            with open("videos.json", encoding="utf-8") as f:
+                videos = json.load(f)
+        except Exception:
+            pass
     return releases, issues, videos
 
 
@@ -261,9 +266,16 @@ def youtube_videos():
     cid = CFG.get("youtubeChannelId") or ""
     if not cid:
         page = fetch_text(CFG["youtube"])
-        # the page's own channel: its canonical link, not channels it recommends
-        m = (re.search(r'<link rel="canonical" href="https://www\.youtube\.com/channel/(UC[\w-]{22})"', page)
-             or re.search(r'"externalId":"(UC[\w-]{22})"', page))
+        # the page's own channel (its canonical link or metadata), not channels it recommends
+        m = None
+        for pat in (r'rel="canonical" href="https://www\.youtube\.com/channel/(UC[\w-]{22})"',
+                    r'href="https://www\.youtube\.com/channel/(UC[\w-]{22})" rel="canonical"',
+                    r'<meta itemprop="(?:identifier|channelId)" content="(UC[\w-]{22})"',
+                    r'"externalId":"(UC[\w-]{22})"',
+                    r'"channelId":"(UC[\w-]{22})"'):
+            m = re.search(pat, page)
+            if m:
+                break
         if not m:
             raise RuntimeError("channel id not found on the channel page")
         cid = m.group(1)
@@ -869,6 +881,8 @@ def videos_page(videos):
     body += '<div class="wrap page-body">' + inner + "</div>"
     if CHANNEL:
         body += f"<!-- channel: {esc(CHANNEL['title'])} {CHANNEL['id']} -->"
+    for w in warnings:
+        body += f"<!-- {esc(w)} -->"
     ld = {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [
         {"@type": "ListItem", "position": n + 1, "url": f"https://www.youtube.com/watch?v={v['id']}", "name": v["title"]}
         for n, v in enumerate(videos[:30])]}
@@ -1043,6 +1057,8 @@ def main():
     apps = build_apps(releases)
     arts, extra_videos = build_articles(issues)
     videos = build_videos(feed, extra_videos, apps)
+    if feed:
+        write("/videos.json", json.dumps(feed, ensure_ascii=False))
     home(apps, videos, arts)
     apps_index(apps)
     for a in apps:
