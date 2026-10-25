@@ -202,6 +202,8 @@
       var v = val(addApp, k[0]);
       if (v) lines.push(k[1] + ": " + v);
     });
+    var whatsnew = val(addApp, "whatsnew");
+    if (whatsnew) lines.push("Whats new: " + whatsnew.replace(/\n+/g, " "));
     var body = lines.join("\n") + "\n\n" + val(addApp, "description");
     var tag = slug(name) + (version ? "-" + slug(version) : "") + "-" + stamp();
     var url = "https://github.com/" + addApp.getAttribute("data-repo") + "/releases/new?tag=" + encodeURIComponent(tag) +
