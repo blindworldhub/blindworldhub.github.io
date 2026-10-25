@@ -362,7 +362,8 @@ def youtube_videos():
 FIELD_KEYS = {"name": "name", "app": "name", "version": "version", "category": "category", "platform": "platform",
               "summary": "summary", "short description": "summary", "video": "video", "youtube": "video",
               "play store": "playstore", "google play": "playstore", "website": "website", "developer": "developer",
-              "virustotal": "virustotal", "virus scan": "virustotal", "price": "price"}
+              "virustotal": "virustotal", "virus scan": "virustotal", "price": "price",
+              "written by": "author", "author": "author"}
 
 
 def parse_release_body(body):
@@ -472,7 +473,7 @@ def build_articles(issues):
             meta, body = front_matter(open(os.path.join(d, f), encoding="utf-8").read())
             arts[kind].append({"title": meta.get("title", f[:-3]), "slug": f[:-3], "body": body,
                                "description": meta.get("description") or plain_summary(body),
-                               "date": parse_date(meta.get("date"))})
+                               "date": parse_date(meta.get("date")), "author": (meta.get("author") or "").strip()})
     owners = {o.lower() for o in CFG.get("owners", [])}
     extra_videos = []
     for i in issues:
@@ -496,7 +497,7 @@ def build_articles(issues):
             slug = f"{slug}-{i['number']}"
         arts[kind].append({"title": i["title"], "slug": slug, "body": rest,
                            "description": fields.get("summary") or plain_summary(rest),
-                           "date": parse_date(i.get("created_at"))})
+                           "date": parse_date(i.get("created_at")), "author": (fields.get("author") or "").strip()})
     for k in arts:
         arts[k].sort(key=lambda a: a["date"], reverse=True)
     return arts, extra_videos
@@ -736,12 +737,27 @@ def video_item(v, level=3):
 </li>"""
 
 
+def is_owner_name(name):
+    return not name or name.strip().lower() == CFG["uploader"].strip().lower()
+
+
+def byline_text(a):
+    au = a.get("author")
+    return f"by {CFG['uploader']}" if is_owner_name(au) else f"by {au}, shared by {CFG['uploader']}"
+
+
+def byline_html(a):
+    me = f'<a href="/about/">{esc(CFG["uploader"])}</a>'
+    au = a.get("author")
+    return f"By {me}" if is_owner_name(au) else f"Written by {esc(au)}, shared by {me}"
+
+
 def article_row(a, kind, level=3):
     folder = "guides" if kind == "guide" else "news"
     return f"""<li class="article-row">
   <h{level}><a href="/{folder}/{a['slug']}/">{esc(a['title'])}</a></h{level}>
   <p>{esc(a['description'])}</p>
-  <p class="meta"><time datetime="{a['date']:%Y-%m-%d}">{fmt_date(a['date'])}</time>, by {esc(CFG['uploader'])}.</p>
+  <p class="meta"><time datetime="{a['date']:%Y-%m-%d}">{fmt_date(a['date'])}</time>, {byline_text(a)}.</p>
 </li>"""
 
 
@@ -967,13 +983,14 @@ def articles_pages(arts):
             cr, ld_c = crumbs([("/", "Home"), (f"/{folder}/", label), (None, a["title"])])
             body = f"""<article>
 <div class="page-head"><div class="wrap">{cr}<h1>{esc(a['title'])}</h1>
-<p class="meta">By <a href="/about/">{esc(CFG['uploader'])}</a>, <time datetime="{a['date']:%Y-%m-%d}">{fmt_date(a['date'])}</time>.</p></div></div>
+<p class="meta">{byline_html(a)}, <time datetime="{a['date']:%Y-%m-%d}">{fmt_date(a['date'])}</time>.</p></div></div>
 <div class="wrap page-body prose">{markdown(a['body'])}
 <p class="back"><a href="/{folder}/">All {label.lower()}</a></p></div>
 </article>"""
             ld = {"@context": "https://schema.org", "@type": "Article" if kind == "guide" else "NewsArticle",
                   "headline": a["title"], "description": a["description"], "datePublished": a["date"].strftime("%Y-%m-%d"),
-                  "author": {"@type": "Person", "name": CFG["uploader"], "url": SITE + "/about/"},
+                  "author": ({"@type": "Person", "name": a["author"]} if a.get("author") else
+                             {"@type": "Person", "name": CFG["uploader"], "url": SITE + "/about/"}),
                   "publisher": {"@type": "Organization", "name": NAME, "logo": {"@type": "ImageObject", "url": SITE + "/assets/img/icon-512.png"}},
                   "mainEntityOfPage": SITE + f"/{folder}/{a['slug']}/"}
             page(f"/{folder}/{a['slug']}/", a["title"], a["description"], body, current=f"/{folder}/",
@@ -1060,6 +1077,7 @@ def owner_pages():
     <label class="choice"><input type="radio" name="kind" value="guide" checked> Guide</label>
     <label class="choice"><input type="radio" name="kind" value="news"> News</label></fieldset>
   <div class="field"><label for="w-title">Title (needed)</label><input id="w-title" name="title" required autocomplete="off"></div>
+  <div class="field"><label for="w-by">Written by. Type your friend's name here. Leave it empty if you wrote it yourself.</label><input id="w-by" name="author" autocomplete="off"></div>
   <div class="field"><label for="w-sum">Short description, one sentence</label><input id="w-sum" name="summary" autocomplete="off"></div>
   <div class="field"><label for="w-text">Text. Start a line with ## for a heading and with - for a list item. A YouTube link alone on a line becomes a video.</label><textarea id="w-text" name="text" rows="12"></textarea></div>
   <p class="form-error" id="write-error" role="alert"></p>

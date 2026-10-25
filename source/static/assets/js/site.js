@@ -216,7 +216,9 @@
     if (!title) return fail("write-error", "Type a title first.", write.elements.title);
     var kind = (write.querySelector("input[name=kind]:checked") || {}).value || "guide";
     var sum = val(write, "summary");
-    var body = (sum ? "Summary: " + sum + "\n\n" : "") + val(write, "text");
+    var by = val(write, "author");
+    var body = (by ? "Written by: " + by + "\n" : "") + (sum ? "Summary: " + sum + "\n" : "") +
+      (by || sum ? "\n" : "") + val(write, "text");
     location.href = "https://github.com/" + write.getAttribute("data-repo") + "/issues/new?labels=" + kind +
       "&title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(body);
   });
