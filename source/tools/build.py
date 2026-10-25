@@ -635,21 +635,6 @@ PREFS_JS = ("(function(){var d=document.documentElement;d.className+=' js';try{v
             "d.setAttribute('data-motion','off');}catch(e){}})();")
 
 
-def announcement_banner():
-    if not ANNOUNCEMENTS:
-        return ""
-    a = sorted(ANNOUNCEMENTS, key=lambda x: x["date"], reverse=True)[0]
-    link = f'<p><a href="{esc(a["link"])}">Open the link</a></p>' if a["link"] else ""
-    return f"""<section class="announce" aria-labelledby="announce-h" data-ann="{a['id']}">
-  <div class="wrap">
-    <h2 id="announce-h">Message from {esc(CFG['uploader'])}: {esc(a['title'])}</h2>
-    {markdown(a['text'], top=3) if a['text'] else ''}{link}
-    <button type="button" class="btn btn-ghost-dark announce-close">Close message</button>
-  </div>
-</section>
-<script>try{{if(localStorage.getItem("bwh-ann-closed")==="{a['id']}")document.querySelector(".announce").hidden=true}}catch(e){{}}</script>"""
-
-
 def page(path, title, description, body, current=None, jsonld=None, noindex=False, extra_head="", scripts="",
          full_title=None, og_type="website", sitemap=True, priority="0.6"):
     url = SITE + path
@@ -693,7 +678,6 @@ def page(path, title, description, body, current=None, jsonld=None, noindex=Fals
 </head>
 <body{gc_attr}>
 {header(current)}
-{announcement_banner()}
 <main id="main" tabindex="-1">
 {body}
 </main>
@@ -974,10 +958,10 @@ def update_files(apps):
 
 
 def messages_file():
-    """messages.json: the owner's current messages to everyone, for apps to show later."""
+    """messages.json: the owner's current messages for Smart TTS users; the app shows each new one once."""
     msgs = [{"id": m["id"], "title": m["title"], "text": m["text"], "link": m["link"], "date": m["date"][:10]}
             for m in sorted(ANNOUNCEMENTS, key=lambda x: x["date"], reverse=True)]
-    write("/messages.json", json.dumps({"from": CFG["uploader"], "messages": msgs}, ensure_ascii=False, indent=1))
+    write("/messages.json", json.dumps({"from": CFG["uploader"], "app": "Smart TTS", "messages": msgs}, ensure_ascii=False, indent=1))
 
 
 def app_page(a, apps):
@@ -1161,7 +1145,7 @@ def owner_pages():
 <ul class="tool-list">
   <li><a class="btn btn-primary" href="/add-app/">Add an app or file</a> Upload an APK, a PDF or any file, or add a Play Store app with its video.</li>
   <li><a class="btn btn-primary" href="/write/">Write a guide or news</a> Publish an article.</li>
-  <li><a class="btn btn-primary" href="/announce/">Send a message to everyone</a> A message that every visitor sees at the top of every page.</li>
+  <li><a class="btn btn-primary" href="/announce/">Send a message to Smart TTS users</a> A message that pops up in Smart TTS when people open it (from the next version of Smart TTS).</li>
   <li><a class="btn btn-primary" href="/add-video/">Add a video</a> Show an older YouTube video on the Videos page. New channel videos appear by themselves.</li>
   <li><a class="btn btn-ghost-dark" href="https://github.com/{repo}/releases">Change or delete apps on GitHub</a></li>
   <li><a class="btn btn-ghost-dark" href="https://github.com/{repo}/issues">Change or delete articles and videos on GitHub</a></li>
@@ -1224,7 +1208,7 @@ def owner_pages():
 </div>"""
     page("/add-video/", "Add a video", "Owner tools.", av, noindex=True, sitemap=False)
 
-    an = page_head("Send a message to everyone", "Your message appears at the top of every page, until you remove it. Only the newest message is shown.")
+    an = page_head("Send a message to Smart TTS users", "Your message pops up in Smart TTS when people open it, with an OK button. It is not shown on this website. This works from the next version of Smart TTS.")
     an += f"""<div class="wrap page-body">
 <form id="announce" class="owner-form" data-repo="{esc(repo)}" novalidate>
   <div class="field"><label for="m-title">Title (needed), for example: New Smart TTS update</label><input id="m-title" name="title" required autocomplete="off"></div>
@@ -1234,9 +1218,9 @@ def owner_pages():
   <button type="submit" class="btn btn-primary">Continue to GitHub</button>
 </form>
 <section class="prose" aria-labelledby="m-next"><h2 id="m-next">On the GitHub page</h2>
-<ol><li>Press "Create".</li><li>About two minutes later the message is at the top of every page. Visitors can close it with the "Close message" button.</li><li>To remove the message for everyone, close that issue on GitHub. To change it, edit the issue.</li></ol></section>
+<ol><li>Press "Create".</li><li>About two minutes later the message is ready. Everyone who opens Smart TTS sees it once.</li><li>To stop showing the message, close that issue on GitHub. To change it, edit the issue.</li></ol></section>
 </div>"""
-    page("/announce/", "Send a message to everyone", "Owner tools.", an, noindex=True, sitemap=False)
+    page("/announce/", "Send a message to Smart TTS users", "Owner tools.", an, noindex=True, sitemap=False)
 
 
 def not_found():

@@ -293,18 +293,6 @@
     });
   }
 
-  // Message to everyone: the visitor can close it; it stays closed until a new message comes
-  var ann = $(".announce");
-  if (ann) {
-    var closeBtn = ann.querySelector(".announce-close");
-    closeBtn.addEventListener("click", function () {
-      try { localStorage.setItem("bwh-ann-closed", ann.getAttribute("data-ann")); } catch (e) {}
-      ann.hidden = true;
-      var main = document.getElementById("main");
-      if (main) main.focus();
-    });
-  }
-
   var announceForm = $("#announce");
   if (announceForm) announceForm.addEventListener("submit", function (ev) {
     ev.preventDefault();
