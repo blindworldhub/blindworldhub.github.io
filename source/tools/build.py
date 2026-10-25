@@ -363,14 +363,15 @@ FIELD_KEYS = {"name": "name", "app": "name", "version": "version", "category": "
               "summary": "summary", "short description": "summary", "video": "video", "youtube": "video",
               "play store": "playstore", "google play": "playstore", "website": "website", "developer": "developer",
               "virustotal": "virustotal", "virus scan": "virustotal", "price": "price",
-              "written by": "author", "author": "author", "link": "link"}
+              "written by": "author", "author": "author", "link": "link",
+              "what's new": "whatsnew", "whats new": "whatsnew", "new": "whatsnew"}
 
 
 def parse_release_body(body):
     fields, rest, started = {}, [], False
     for line in (body or "").replace("\r\n", "\n").split("\n"):
         if not started:
-            m = re.match(r"^\s*\**([A-Za-z ]{2,20}?)\**\s*:\s*(.*)$", line)
+            m = re.match(r"^\s*\**([A-Za-z '’]{2,20}?)\**\s*:\s*(.*)$", line)
             if m and m.group(1).strip().lower() in FIELD_KEYS:
                 fields[FIELD_KEYS[m.group(1).strip().lower()]] = m.group(2).strip()
                 continue
@@ -435,7 +436,7 @@ def build_apps(releases):
             "summary": fields.get("summary") or plain_summary(desc) or f"{name} for {PLATS[plat]}.",
             "description": desc, "video": youtube_id(fields.get("video")), "playstore": fields.get("playstore", ""),
             "website": fields.get("website", ""), "developer": fields.get("developer", ""),
-            "virustotal": fields.get("virustotal", ""),
+            "virustotal": fields.get("virustotal", ""), "whatsnew": fields.get("whatsnew", ""),
             "date": parse_date(r.get("published_at") or r.get("created_at")),
             "files": [{"name": a["name"], "size": a.get("size", 0), "url": a["browser_download_url"],
                        "downloads": a.get("download_count", 0), "id": a.get("id"),
@@ -450,7 +451,7 @@ def build_apps(releases):
     for a in apps.values():
         latest = next((v for v in a["versions"] if not v["prerelease"]), a["versions"][0])
         a.update({k: latest[k] for k in ("name", "version", "category", "platform", "summary", "description",
-                                         "playstore", "website", "developer", "virustotal", "files")})
+                                         "playstore", "website", "developer", "virustotal", "whatsnew", "files")})
         a["video"] = latest["video"] or next((v["video"] for v in a["versions"] if v["video"]), None)
         a["updated"] = latest["date"]
         a["added"] = a["versions"][-1]["date"]
@@ -953,7 +954,7 @@ def update_files(apps):
         info = {"name": a["name"], "version": a["version"], "fileId": apk["id"],
                 "versionCode": apk_version_code(dict(apk, slug=a["slug"])), "url": apk["url"],
                 "size": apk["size"], "sha256": apk["sha256"], "date": a["updated"].strftime("%Y-%m-%d"),
-                "page": SITE + a["url"], "summary": a["summary"]}
+                "page": SITE + a["url"], "summary": a["summary"], "whatsNew": a.get("whatsnew", "")}
         write(f"/updates/{a['slug']}.json", json.dumps(info, ensure_ascii=False, indent=1))
 
 
@@ -1162,6 +1163,7 @@ def owner_pages():
   <div class="field"><label for="a-plat">Platform</label><select id="a-plat" name="platform">{plat_opts}</select></div>
   <div class="field"><label for="a-sum">Short description, one sentence</label><input id="a-sum" name="summary" autocomplete="off"></div>
   <div class="field"><label for="a-desc">Full description and features</label><textarea id="a-desc" name="description" rows="6"></textarea></div>
+  <div class="field"><label for="a-new">What's new in this version (for app updates; shown in the app's update message)</label><textarea id="a-new" name="whatsnew" rows="3"></textarea></div>
   <div class="field"><label for="a-video">YouTube video link (optional)</label><input id="a-video" name="video" type="url" inputmode="url" autocomplete="off"></div>
   <div class="field"><label for="a-play">Play Store link (optional)</label><input id="a-play" name="playstore" type="url" inputmode="url" autocomplete="off"></div>
   <div class="field"><label for="a-web">Developer website (optional)</label><input id="a-web" name="website" type="url" inputmode="url" autocomplete="off"></div>
