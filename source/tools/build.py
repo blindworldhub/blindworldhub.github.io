@@ -669,6 +669,7 @@ def page(path, title, description, body, current=None, jsonld=None, noindex=Fals
 <main id="main" tabindex="-1">
 {body}
 </main>
+<p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
 {footer()}
 <script src="/assets/js/site.js?v={ASSET_VER}" defer></script>
 {scripts}
@@ -708,6 +709,11 @@ def meta_line(a):
     return " ".join(parts)
 
 
+def copy_button(a, cls="btn btn-ghost-dark btn-row"):
+    return (f'<button type="button" class="{cls} copy-link" data-url="{esc(SITE + a["url"])}" '
+            f'data-name="{esc(a["name"])}" hidden>Copy link to {esc(a["name"])}</button>')
+
+
 def row_actions(a):
     """Download buttons right in the list, so nobody has to open the app page first."""
     links = [f'<a class="btn btn-primary btn-row" href="{esc(f["url"])}">Download {esc(a["label"])}, '
@@ -715,7 +721,8 @@ def row_actions(a):
     if a["playstore"]:
         links.append(f'<a class="btn btn-ghost-dark btn-row" href="{esc(safe_url(a["playstore"]))}" rel="noopener">'
                      f'Get {esc(a["name"])} on Google Play</a>')
-    return f'<p class="row-actions">{" ".join(links)}</p>' if links else ""
+    links.append(copy_button(a))
+    return f'<p class="row-actions">{" ".join(links)}</p>'
 
 
 def app_row(a, level=3):
@@ -917,6 +924,18 @@ def app_page(a, apps):
     related = [x for x in apps if x["slug"] != a["slug"] and x["category"] == a["category"]][:4]
     related += [x for x in apps if x["slug"] != a["slug"] and x not in related][:4 - len(related)]
     desc_html = markdown(a["description"], top=3) if a["description"] else f"<p>{esc(a['summary'])}</p>"
+    rows = [("Name", esc(a["name"])), ("Version", esc(a["version"]) if a["version"] else "Not given"),
+            ("Uploaded on", f'<time datetime="{a["updated"]:%Y-%m-%d}">{fmt_date(a["updated"])}</time>')]
+    if a["added"].date() != a["updated"].date():
+        rows.append(("First added", f'<time datetime="{a["added"]:%Y-%m-%d}">{fmt_date(a["added"])}</time>'))
+    if a["files"]:
+        rows.append(("File size", human_size(a["files"][0]["size"]) +
+                     (f", {file_kind(a['files'][0]['name'])}" if len(a["files"]) == 1 else f", {len(a['files'])} files")))
+    rows += [("Platform", esc(PLATS[a["platform"]])), ("Category", esc(CATS[a["category"]]))]
+    if a["developer"]:
+        rows.append(("Developer", esc(a["developer"])))
+    rows.append(("Uploaded by", esc(CFG["uploader"])))
+    details = "".join(f'<div class="details-row"><dt>{k}</dt><dd>{v}</dd></div>' for k, v in rows)
     body = f"""<article class="app-page">
 <div class="page-head"><div class="wrap">{cr}
   <div class="app-head">{app_mark(a['name'])}<div>
@@ -928,6 +947,11 @@ def app_page(a, apps):
   <p class="lede">{esc(a['summary'])}</p>
 </div></div>
 <div class="wrap page-body app-body">
+  <section aria-labelledby="details" class="details-box">
+    <h2 id="details">App details</h2>
+    <dl class="details">{details}</dl>
+    <p class="details-share">{copy_button(a, "btn btn-ghost-dark")}</p>
+  </section>
   <section aria-labelledby="download" class="download-box">
     <h2 id="download">Download</h2>
     {('<ul class="download-list">' + ''.join(dl) + '</ul>') if dl else '<p>No download for this app yet.</p>'}

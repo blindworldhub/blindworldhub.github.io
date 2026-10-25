@@ -234,4 +234,34 @@
     location.href = "https://github.com/" + addVideo.getAttribute("data-repo") + "/issues/new?labels=video" +
       "&title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(body);
   });
+
+  // Copy link buttons: shown only when the browser can copy
+  var copyStatus = $("#copy-status");
+  function say(text) {
+    if (!copyStatus) return;
+    copyStatus.textContent = "";
+    setTimeout(function () { copyStatus.textContent = text; }, 60);
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    return new Promise(function (ok, bad) {
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy") ? ok() : bad(); } catch (e) { bad(); }
+      document.body.removeChild(ta);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".copy-link"), function (b) {
+    b.hidden = false;
+    b.addEventListener("click", function () {
+      var name = b.getAttribute("data-name"), url = b.getAttribute("data-url");
+      copyText(url).then(function () {
+        b.classList.add("is-done");
+        say("Link to " + name + " copied. You can paste it to share.");
+      }, function () {
+        say("Could not copy. The link is " + url);
+      });
+    });
+  });
 })();
