@@ -363,7 +363,7 @@ FIELD_KEYS = {"name": "name", "app": "name", "version": "version", "category": "
               "summary": "summary", "short description": "summary", "video": "video", "youtube": "video",
               "play store": "playstore", "google play": "playstore", "website": "website", "developer": "developer",
               "virustotal": "virustotal", "virus scan": "virustotal", "price": "price",
-              "written by": "author", "author": "author"}
+              "written by": "author", "author": "author", "link": "link"}
 
 
 def parse_release_body(body):
@@ -438,7 +438,8 @@ def build_apps(releases):
             "virustotal": fields.get("virustotal", ""),
             "date": parse_date(r.get("published_at") or r.get("created_at")),
             "files": [{"name": a["name"], "size": a.get("size", 0), "url": a["browser_download_url"],
-                       "downloads": a.get("download_count", 0)} for a in assets],
+                       "downloads": a.get("download_count", 0), "id": a.get("id"),
+                       "sha256": (a.get("digest") or "").replace("sha256:", "")} for a in assets],
             "tag": r.get("tag_name", ""), "prerelease": bool(r.get("prerelease")),
         })
     apps = {}
@@ -463,6 +464,9 @@ def build_apps(releases):
 
 # ---------------------------------------------------------------- articles and videos
 
+ANNOUNCEMENTS = []
+
+
 def build_articles(issues):
     arts = {"guide": [], "news": []}
     for kind, folder in (("guide", "guides"), ("news", "news")):
@@ -482,6 +486,10 @@ def build_articles(issues):
         labels = {(l["name"] if isinstance(l, dict) else l).lower() for l in i.get("labels", [])}
         body = i.get("body") or ""
         fields, rest = parse_release_body(body)
+        if "announcement" in labels:
+            ANNOUNCEMENTS.append({"id": i.get("number"), "title": i["title"], "text": rest,
+                                  "link": safe_url(fields["link"]) if fields.get("link") else "", "date": i.get("created_at") or ""})
+            continue
         if "video" in labels:
             vid = youtube_id(fields.get("video") or body)
             if vid:
@@ -627,6 +635,21 @@ PREFS_JS = ("(function(){var d=document.documentElement;d.className+=' js';try{v
             "d.setAttribute('data-motion','off');}catch(e){}})();")
 
 
+def announcement_banner():
+    if not ANNOUNCEMENTS:
+        return ""
+    a = sorted(ANNOUNCEMENTS, key=lambda x: x["date"], reverse=True)[0]
+    link = f'<p><a href="{esc(a["link"])}">Open the link</a></p>' if a["link"] else ""
+    return f"""<section class="announce" aria-labelledby="announce-h" data-ann="{a['id']}">
+  <div class="wrap">
+    <h2 id="announce-h">Message from {esc(CFG['uploader'])}: {esc(a['title'])}</h2>
+    {markdown(a['text'], top=3) if a['text'] else ''}{link}
+    <button type="button" class="btn btn-ghost-dark announce-close">Close message</button>
+  </div>
+</section>
+<script>try{{if(localStorage.getItem("bwh-ann-closed")==="{a['id']}")document.querySelector(".announce").hidden=true}}catch(e){{}}</script>"""
+
+
 def page(path, title, description, body, current=None, jsonld=None, noindex=False, extra_head="", scripts="",
          full_title=None, og_type="website", sitemap=True, priority="0.6"):
     url = SITE + path
@@ -670,6 +693,7 @@ def page(path, title, description, body, current=None, jsonld=None, noindex=Fals
 </head>
 <body{gc_attr}>
 {header(current)}
+{announcement_banner()}
 <main id="main" tabindex="-1">
 {body}
 </main>
@@ -903,6 +927,59 @@ def apps_index(apps):
                  b, current="/apps/", jsonld=[ld], priority="0.7")
 
 
+def apk_version_code(f):
+    """The versionCode inside an APK, read with aapt2 from the Android SDK on the build machine.
+    Kept from the last build when the file has not changed, so each file is only read once."""
+    try:
+        with open(os.path.join("updates", f["slug"] + ".json"), encoding="utf-8") as fh:
+            old = json.load(fh)
+        if old.get("fileId") == f["id"] and old.get("versionCode"):
+            return old["versionCode"]
+    except Exception:
+        pass
+    sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
+    if SAMPLE or OFFLINE or not sdk:
+        return None
+    import glob
+    import subprocess
+    import tempfile
+    tools = sorted(glob.glob(os.path.join(sdk, "build-tools", "*", "aapt2")))
+    if not tools:
+        return None
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            apk = os.path.join(td, "app.apk")
+            req = urllib.request.Request(f["url"], headers={"User-Agent": "blindworldhub-site"})
+            with urllib.request.urlopen(req, timeout=120) as r, open(apk, "wb") as out:
+                shutil.copyfileobj(r, out)
+            info = subprocess.run([tools[-1], "dump", "badging", apk], capture_output=True, text=True, timeout=120).stdout
+        m = re.search(r"versionCode='(\d+)'", info)
+        return int(m.group(1)) if m else None
+    except Exception as e:
+        warnings.append(f"could not read the version of {f['name']}: {e}")
+        return None
+
+
+def update_files(apps):
+    """updates/<app>.json: what an app needs to update itself (newest version, file, checksum)."""
+    for a in apps:
+        apk = next((f for f in a["files"] if f["name"].lower().endswith(".apk")), None)
+        if a["platform"] != "android" or not apk:
+            continue
+        info = {"name": a["name"], "version": a["version"], "fileId": apk["id"],
+                "versionCode": apk_version_code(dict(apk, slug=a["slug"])), "url": apk["url"],
+                "size": apk["size"], "sha256": apk["sha256"], "date": a["updated"].strftime("%Y-%m-%d"),
+                "page": SITE + a["url"], "summary": a["summary"]}
+        write(f"/updates/{a['slug']}.json", json.dumps(info, ensure_ascii=False, indent=1))
+
+
+def messages_file():
+    """messages.json: the owner's current messages to everyone, for apps to show later."""
+    msgs = [{"id": m["id"], "title": m["title"], "text": m["text"], "link": m["link"], "date": m["date"][:10]}
+            for m in sorted(ANNOUNCEMENTS, key=lambda x: x["date"], reverse=True)]
+    write("/messages.json", json.dumps({"from": CFG["uploader"], "messages": msgs}, ensure_ascii=False, indent=1))
+
+
 def app_page(a, apps):
     cr, ld_c = crumbs([("/", "Home"), ("/apps/", "Apps"), (None, a["name"])])
     dl = []
@@ -1084,6 +1161,7 @@ def owner_pages():
 <ul class="tool-list">
   <li><a class="btn btn-primary" href="/add-app/">Add an app or file</a> Upload an APK, a PDF or any file, or add a Play Store app with its video.</li>
   <li><a class="btn btn-primary" href="/write/">Write a guide or news</a> Publish an article.</li>
+  <li><a class="btn btn-primary" href="/announce/">Send a message to everyone</a> A message that every visitor sees at the top of every page.</li>
   <li><a class="btn btn-primary" href="/add-video/">Add a video</a> Show an older YouTube video on the Videos page. New channel videos appear by themselves.</li>
   <li><a class="btn btn-ghost-dark" href="https://github.com/{repo}/releases">Change or delete apps on GitHub</a></li>
   <li><a class="btn btn-ghost-dark" href="https://github.com/{repo}/issues">Change or delete articles and videos on GitHub</a></li>
@@ -1146,6 +1224,20 @@ def owner_pages():
 </div>"""
     page("/add-video/", "Add a video", "Owner tools.", av, noindex=True, sitemap=False)
 
+    an = page_head("Send a message to everyone", "Your message appears at the top of every page, until you remove it. Only the newest message is shown.")
+    an += f"""<div class="wrap page-body">
+<form id="announce" class="owner-form" data-repo="{esc(repo)}" novalidate>
+  <div class="field"><label for="m-title">Title (needed), for example: New Smart TTS update</label><input id="m-title" name="title" required autocomplete="off"></div>
+  <div class="field"><label for="m-text">Message</label><textarea id="m-text" name="text" rows="6"></textarea></div>
+  <div class="field"><label for="m-link">Link (optional), for example the page of an app</label><input id="m-link" name="link" type="url" inputmode="url" autocomplete="off"></div>
+  <p class="form-error" id="announce-error" role="alert"></p>
+  <button type="submit" class="btn btn-primary">Continue to GitHub</button>
+</form>
+<section class="prose" aria-labelledby="m-next"><h2 id="m-next">On the GitHub page</h2>
+<ol><li>Press "Create".</li><li>About two minutes later the message is at the top of every page. Visitors can close it with the "Close message" button.</li><li>To remove the message for everyone, close that issue on GitHub. To change it, edit the issue.</li></ol></section>
+</div>"""
+    page("/announce/", "Send a message to everyone", "Owner tools.", an, noindex=True, sitemap=False)
+
 
 def not_found():
     body = page_head("Page not found", "This page does not exist, or it has moved.")
@@ -1161,7 +1253,7 @@ def finish():
     urls = "".join(f"<url><loc>{esc(SITE + p)}</loc><lastmod>{today}</lastmod><priority>{pr}</priority></url>"
                    for p, pr in pages_for_sitemap)
     write("/sitemap.xml", f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
-    write("/robots.txt", f"User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /add-app/\nDisallow: /write/\nDisallow: /add-video/\nSitemap: {SITE}/sitemap.xml\n")
+    write("/robots.txt", f"User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /add-app/\nDisallow: /write/\nDisallow: /add-video/\nDisallow: /announce/\nSitemap: {SITE}/sitemap.xml\n")
     write("/search.json", json.dumps(search_items, ensure_ascii=False, separators=(",", ":")))
     write("/manifest.webmanifest", json.dumps({
         "name": NAME, "short_name": "BW Hub", "start_url": "/", "display": "standalone",
@@ -1184,6 +1276,8 @@ def main():
     videos = build_videos(feed, extra_videos, apps)
     if feed:
         write("/videos.json", json.dumps(feed, ensure_ascii=False))
+    update_files(apps)
+    messages_file()
     home(apps, videos, arts)
     apps_index(apps)
     for a in apps:

@@ -292,4 +292,27 @@
       });
     });
   }
+
+  // Message to everyone: the visitor can close it; it stays closed until a new message comes
+  var ann = $(".announce");
+  if (ann) {
+    var closeBtn = ann.querySelector(".announce-close");
+    closeBtn.addEventListener("click", function () {
+      try { localStorage.setItem("bwh-ann-closed", ann.getAttribute("data-ann")); } catch (e) {}
+      ann.hidden = true;
+      var main = document.getElementById("main");
+      if (main) main.focus();
+    });
+  }
+
+  var announceForm = $("#announce");
+  if (announceForm) announceForm.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var title = val(announceForm, "title");
+    if (!title) return fail("announce-error", "Type a title first.", announceForm.elements.title);
+    var link = val(announceForm, "link");
+    var body = (link ? "Link: " + link + "\n\n" : "") + val(announceForm, "text");
+    location.href = "https://github.com/" + announceForm.getAttribute("data-repo") + "/issues/new?labels=announcement" +
+      "&title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(body);
+  });
 })();
