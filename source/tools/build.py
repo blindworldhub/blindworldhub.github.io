@@ -121,8 +121,10 @@ def youtube_id(u):
     return m.group(1) if m else None
 
 
-def markdown(md, top=2):
-    """Headings start at level `top` (a page already has its h1). A YouTube link alone on a line becomes a video."""
+def markdown(md, top=2, by_line=False):
+    """Headings start at level `top` (a page already has its h1). A YouTube link alone on a line becomes a video.
+    by_line (app descriptions): every line is its own paragraph, and a short line ending in a colon ("Main features:")
+    is a heading, so a screen reader reads the description heading by heading and line by line."""
     lines = (md or "").replace("\r\n", "\n").split("\n")
     out, para, lst = [], [], None
 
@@ -141,6 +143,10 @@ def markdown(md, top=2):
         s = line.strip()
         if not s:
             flush()
+            continue
+        if by_line and len(s) <= 70 and s.endswith(":") and not re.match(r"^[-*+]\s|^\d+[.)]\s", s):
+            flush()
+            out.append(f"<h{top}>{inline(s[:-1].strip())}</h{top}>")
             continue
         h = re.match(r"^(#{1,6})\s+(.*)$", s)
         if h:
@@ -172,6 +178,8 @@ def markdown(md, top=2):
         if lst:
             flush()
         para.append(s)
+        if by_line:
+            flush()
     flush()
     return "\n".join(out)
 
@@ -991,46 +999,40 @@ def app_page(a, apps):
         older_html = f'<section aria-labelledby="older"><h2 id="older">Older versions</h2><ul class="plain-list">{"".join(rows)}</ul></section>'
     related = [x for x in apps if x["slug"] != a["slug"] and x["category"] == a["category"]][:4]
     related += [x for x in apps if x["slug"] != a["slug"] and x not in related][:4 - len(related)]
-    desc_html = markdown(a["description"], top=3) if a["description"] else f"<p>{esc(a['summary'])}</p>"
-    rows = [("Name", esc(a["name"])), ("Version", esc(a["version"]) if a["version"] else "Not given"),
-            ("Uploaded on", f'<time datetime="{a["updated"]:%Y-%m-%d}">{fmt_date(a["updated"])}</time>')]
-    if a["added"].date() != a["updated"].date():
-        rows.append(("First added", f'<time datetime="{a["added"]:%Y-%m-%d}">{fmt_date(a["added"])}</time>'))
+    desc_html = markdown(a["description"], top=3, by_line=True) if a["description"] else ""
+    # The page reads top to bottom in this order: name, version, uploaded by, date, short description, the long
+    # description heading by heading, the download, and the views.
+    facts = []
     if a["files"]:
-        rows.append(("File size", human_size(a["files"][0]["size"]) +
-                     (f", {file_kind(a['files'][0]['name'])}" if len(a["files"]) == 1 else f", {len(a['files'])} files")))
-    rows += [("Platform", esc(PLATS[a["platform"]])), ("Category", esc(CATS[a["category"]]))]
+        facts.append(("File size", human_size(a["files"][0]["size"]) +
+                      (f", {file_kind(a['files'][0]['name'])}" if len(a["files"]) == 1 else f", {len(a['files'])} files")))
+        facts.append(("Downloads", f'{a["downloads"]:,}'))
+    facts += [("Platform", f'<a href="/apps/platform/{a["platform"]}/">{esc(PLATS[a["platform"]])}</a>'),
+              ("Category", f'<a href="/apps/category/{a["category"]}/">{esc(CATS[a["category"]])}</a>')]
     if a["developer"]:
-        rows.append(("Developer", esc(a["developer"])))
-    rows.append(("Uploaded by", esc(CFG["uploader"])))
-    if a["files"]:
-        rows.append(("Downloads", f'{a["downloads"]:,}'))
-    details = "".join(f'<div class="details-row"><dt>{k}</dt><dd>{v}</dd></div>' for k, v in rows)
-    details += (f'<div class="details-row" data-views-row hidden><dt>Views</dt>'
-                f'<dd data-views="{esc(a["url"])}"></dd></div>')
+        facts.append(("Developer", esc(a["developer"])))
+    facts_html = "".join(f"<p>{k}: {v}</p>" for k, v in facts)
     body = f"""<article class="app-page">
 <div class="page-head"><div class="wrap">{cr}
   <div class="app-head">{app_mark(a['name'])}<div>
     <h1>{esc(a['name'])}</h1>
-    <p class="app-version">{('Version ' + esc(a['version'])) if a['version'] else ''}</p>
-    <p class="meta">Uploaded by <a href="/about/">{esc(CFG['uploader'])}</a> on <time datetime="{a['updated']:%Y-%m-%d}">{fmt_date(a['updated'])}</time>.{' Developer: ' + esc(a['developer']) + '.' if a['developer'] else ''}</p>
-    <ul class="chips"><li><a href="/apps/platform/{a['platform']}/">{esc(PLATS[a['platform']])}</a></li><li><a href="/apps/category/{a['category']}/">{esc(CATS[a['category']])}</a></li></ul>
+    {('<p class="app-version">Version ' + esc(a['version']) + '</p>') if a['version'] else ''}
+    <p class="meta">Uploaded by <a href="/about/">{esc(CFG['uploader'])}</a></p>
+    <p class="meta">Date: <time datetime="{a['updated']:%Y-%m-%d}">{fmt_date(a['updated'])}</time></p>
   </div></div>
   <p class="lede">{esc(a['summary'])}</p>
 </div></div>
 <div class="wrap page-body app-body">
-  <section aria-labelledby="details" class="details-box">
-    <h2 id="details">App details</h2>
-    <dl class="details">{details}</dl>
-    <p class="details-share">{copy_button(a, "btn btn-ghost-dark")}</p>
-  </section>
+  {f'<section aria-labelledby="about-app" class="prose"><h2 id="about-app">About {esc(a["name"])}</h2>{desc_html}</section>' if desc_html else ''}
+  {f'<section aria-labelledby="video"><h2 id="video">Video review</h2>{video_embed(a["video"], a["name"] + " review")}</section>' if a['video'] else ''}
   <section aria-labelledby="download" class="download-box">
     <h2 id="download">Download</h2>
+    <p class="details-share">{copy_button(a, "btn btn-ghost-dark")}</p>
     {('<ul class="download-list">' + ''.join(dl) + '</ul>') if dl else '<p>No download for this app yet.</p>'}
     {install}
+    <p class="views" data-views-row hidden>Views: <span data-views="{esc(a["url"])}"></span></p>
+    <div class="app-facts">{facts_html}</div>
   </section>
-  {f'<section aria-labelledby="video"><h2 id="video">Video review</h2>{video_embed(a["video"], a["name"] + " review")}</section>' if a['video'] else ''}
-  <section aria-labelledby="about-app" class="prose"><h2 id="about-app">About this app</h2>{desc_html}</section>
   {older_html}
   <p class="disclaimer">This app is shared as it is, for personal use. It belongs to its developer. Read the <a href="/disclaimer/">disclaimer</a>.</p>
   {f'<section aria-labelledby="more-apps"><h2 id="more-apps">More apps</h2><ul class="app-list">{"".join(app_row(x, 3) for x in related)}</ul></section>' if related else ''}
