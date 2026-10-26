@@ -830,6 +830,7 @@ def home(apps, videos, arts):
     hero = f"""<section class="hero" aria-labelledby="hero-title">
   <div class="wrap hero-grid">
     <div class="hero-copy">
+      <p id="greeting" class="greeting" hidden></p>
       <h1 id="hero-title" class="hero-title">Blind World Hub</h1>
       <p class="hero-braille">{braille_svg("blind", "hero-dots", 3.2, 10, 26)}{braille_svg("world", "hero-dots", 3.2, 10, 26)}{braille_svg("hub", "hero-dots", 3.2, 10, 26)}</p>
       <p class="lede">Accessible apps, guides and video reviews for blind and visually impaired people, shared by {esc(CFG['uploader'])}, a blind creator who reviews apps with a screen reader.</p>
