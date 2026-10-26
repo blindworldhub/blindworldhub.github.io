@@ -126,6 +126,15 @@ def markdown(md, top=2, by_line=False):
     by_line (app descriptions): every line is its own paragraph, and a short line ending in a colon ("Main features:")
     is a heading, so a screen reader reads the description heading by heading and line by line."""
     lines = (md or "").replace("\r\n", "\n").split("\n")
+    if by_line:
+        # "1." on a line of its own (as copying a numbered list from a phone gives) joins the line after it
+        joined = []
+        for ln in lines:
+            if joined and re.fullmatch(r"\s*\d+[.)]\s*", joined[-1]) and ln.strip():
+                joined[-1] = joined[-1].strip() + " " + ln.strip()
+            else:
+                joined.append(ln)
+        lines = joined
     out, para, lst = [], [], None
 
     def flush():
@@ -738,25 +747,32 @@ def copy_button(a, cls="btn btn-ghost-dark btn-row"):
 
 
 def row_actions(a):
-    """Download buttons right in the list, so nobody has to open the app page first."""
-    links = [f'<a class="btn btn-primary btn-row" href="{esc(f["url"])}">Download {esc(a["label"])}, '
-             f'{file_kind(f["name"])}, {human_size(f["size"])}</a>' for f in a["files"]]
+    """Copy link first, then the download buttons, right in the list, so nobody has to open the app page first."""
+    links = [copy_button(a)]
+    links += [f'<a class="btn btn-primary btn-row" href="{esc(f["url"])}">Download {esc(a["label"])}, '
+              f'{file_kind(f["name"])}, {human_size(f["size"])}</a>' for f in a["files"]]
     if a["playstore"]:
         links.append(f'<a class="btn btn-ghost-dark btn-row" href="{esc(safe_url(a["playstore"]))}" rel="noopener">'
                      f'Get {esc(a["name"])} on Google Play</a>')
-    links.append(copy_button(a))
     return f'<p class="row-actions">{" ".join(links)}</p>'
 
 
 def app_row(a, level=3):
+    """In every list the app reads in the same order as its own page, one line at a time: name, version, uploaded by,
+    date, short description, the long description heading by heading, copy link, download, and views."""
     search_text = " ".join([a["name"], a["summary"], CATS[a["category"]], PLATS[a["platform"]]]).lower()
+    desc = markdown(a["description"], top=min(6, level + 1), by_line=True) if a.get("description") else ""
     return f"""<li class="app-row" data-cat="{a['category']}" data-plat="{a['platform']}" data-text="{esc(search_text)}">
   {app_mark(a['name'])}
   <div class="app-row-body">
-    <h{level} class="app-row-title"><a href="{a['url']}">{esc(a['label'])}</a></h{level}>
+    <h{level} class="app-row-title"><a href="{a['url']}">{esc(a['name'])}</a></h{level}>
+    {('<p class="meta">Version ' + esc(a['version']) + '</p>') if a.get('version') else ''}
+    <p class="meta">Uploaded by {esc(CFG['uploader'])}</p>
+    <p class="meta">Date: <time datetime="{a['updated']:%Y-%m-%d}">{fmt_date(a['updated'])}</time></p>
     <p class="app-row-sum">{esc(a['summary'])}</p>
-    <p class="meta">{meta_line(a)}</p>
+    {f'<div class="app-row-desc prose">{desc}</div>' if desc else ''}
     {row_actions(a)}
+    <p class="meta"><span class="views-inline" data-views="{esc(a['url'])}" hidden></span></p>
   </div>
 </li>"""
 
