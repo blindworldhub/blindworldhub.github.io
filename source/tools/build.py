@@ -772,6 +772,7 @@ def app_row(a, level=3):
     <p class="app-row-sum">{esc(a['summary'])}</p>
     {f'<div class="app-row-desc prose">{desc}</div>' if desc else ''}
     {row_actions(a)}
+    {f'<p class="meta">Downloads: {a["downloads"]:,}</p>' if a.get("files") else ''}
     <p class="meta"><span class="views-inline" data-views="{esc(a['url'])}" hidden></span></p>
   </div>
 </li>"""
