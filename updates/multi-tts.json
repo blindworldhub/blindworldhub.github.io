@@ -1,0 +1,13 @@
+{
+ "name": "Multi TTS",
+ "version": "1.8.3",
+ "fileId": 677390167,
+ "versionCode": 84,
+ "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/multi-tts-1-8-3-20261026-1213/MultiTTS_v1.8.3.apk",
+ "size": 151736991,
+ "sha256": "d3f7736b1bf162829677c0772a344696f8f5940e99f45879aa5e26070d0416af",
+ "date": "2026-10-26",
+ "page": "https://blindworldhub.github.io/apps/multi-tts/",
+ "summary": "MultiTTS is a free text-to-speech engine for Android with no voices of its own: you import voice packs (zip files) for any language, choose the speaker you like, and use it with TalkBack, Jieshuo and other screen readers.",
+ "whatsNew": ""
+}
