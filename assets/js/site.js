@@ -267,6 +267,29 @@
     });
   });
 
+  // Greeting at the top of the home page, by the visitor's own phone clock and time zone. It is set once on
+  // opening and then quietly kept up to date every minute (no live region, so the screen reader is not interrupted).
+  var greet = document.getElementById("greeting");
+  if (greet) {
+    var setGreeting = function () {
+      var now = new Date();
+      var h = now.getHours();
+      var word = h >= 5 && h < 12 ? "Good morning" : h >= 12 && h < 17 ? "Good afternoon" : h >= 17 && h < 21 ? "Good evening" : "Good night";
+      var day, time;
+      try {
+        day = now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        time = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+      } catch (e) {
+        day = now.toDateString();
+        time = now.getHours() + ":" + ("0" + now.getMinutes()).slice(-2);
+      }
+      greet.textContent = word + ". Today is " + day + ", " + time + ". Welcome to Blind World Hub.";
+      greet.hidden = false;
+    };
+    setGreeting();
+    setInterval(setGreeting, 30000);
+  }
+
   // View counts from GoatCounter, when the site has a counter
   var counter = document.body.getAttribute("data-counter");
   var viewEls = document.querySelectorAll("[data-views]");

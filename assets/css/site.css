@@ -308,3 +308,5 @@ button, .btn { cursor: pointer; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
+
+.greeting { font-size: 1.15rem; font-weight: 700; color: var(--on-navy); margin: 0 0 0.6rem; }
