@@ -1,5 +1,13 @@
 {
  "from": "Waqas",
  "app": "Smart TTS",
- "messages": []
+ "messages": [
+  {
+   "id": 1,
+   "title": "Thank you for installing Smart TTS 1.2",
+   "text": "What's new in version 1.2\nSpeaks from the moment the phone starts: after a restart, Smart TTS speaks right away, even before you unlock the phone. Another voice no longer speaks first.\nMake audio file: turn any text into an audio file and save or share it.\nEmojis in every language: emojis are now read in the language of the text around them, in Urdu, Hindi, Arabic, English and more. A new Read emojis option in Settings turns emojis on or off.\nFaster language switching: moving from one language to another, such as Urdu to English or English to Hindi, is now quicker.\nBetter battery life: Smart TTS now uses less battery.\nAutomatic updates: Smart TTS now checks for new versions by itself and tells you when one is ready. You can also check at any time: open About and guide and press Check for updates.\nMany smaller bug fixes and improvements. If you want to know more about this app, please watch our video by clicking on this link. 📱🎥",
+   "link": "https://youtu.be/sviANC2bHco?si=yXg628xDp5gUmy3s",
+   "date": "2026-10-27"
+  }
+ ]
 }
