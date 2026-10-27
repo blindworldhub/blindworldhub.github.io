@@ -1,13 +1,13 @@
 {
  "name": "Smart TTS",
- "version": "1.1",
- "fileId": 674363042,
- "versionCode": 9,
- "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/smart-tts-1-1-20261025-1213/SmartTTS.apk",
- "size": 11859024,
- "sha256": "85b131672cd714f0aaba1a73cb1a73779330a781907dd9e59dbceb00ff22279e",
- "date": "2026-10-25",
+ "version": "1.2",
+ "fileId": 681233020,
+ "versionCode": 20,
+ "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/smart-tts-1-2-20261027-1521/Smart.TTS.apk",
+ "size": 13549134,
+ "sha256": "7a9e1b8685c37b6b71080f83f0d3d7ea9e11094f8a0b2370fc8cd5c6d2e88494",
+ "date": "2026-10-27",
  "page": "https://blindworldhub.github.io/apps/smart-tts/",
- "summary": "A multilingual text-to-speech engine that reads every language with its own voice, made for blind users.",
+ "summary": "Smart TTS is a multilingual text-to-speech engine for Android that reads every language with its own voice, even inside one sentence, made for blind and visually impaired people.",
  "whatsNew": ""
 }
