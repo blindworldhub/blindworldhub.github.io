@@ -13,6 +13,10 @@
   "goatcounter": "",
   "whatsapp": "https://chat.whatsapp.com/LV2n4kBnzTy3N1zXwUiHHm",
   "googleSiteVerification": "",
+  "categoryOverrides": {
+    "smart-tts": "voices",
+    "multi-tts": "voices"
+  },
   "categories": [
     ["screen-readers", "Screen readers"],
     ["voices", "Voices and text to speech"],

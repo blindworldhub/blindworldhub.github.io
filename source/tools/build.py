@@ -448,6 +448,10 @@ def build_apps(releases):
         cat = match_key(fields.get("category"), CATS, "other") or (
             "documents" if plat == "all" and assets and all(file_kind(a["name"]).endswith(("document", "book"))
                                                             for a in assets) else "other")
+        # the owner can move an app to another category in site.json without editing its releases
+        cat = CFG.get("categoryOverrides", {}).get(slugify(name), cat)
+        if cat not in CATS:
+            cat = "other"
         versions.append({
             "name": name, "version": version, "slug": slugify(name), "category": cat, "platform": plat,
             "summary": fields.get("summary") or plain_summary(desc) or f"{name} for {PLATS[plat]}.",
