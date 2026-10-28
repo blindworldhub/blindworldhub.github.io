@@ -194,6 +194,8 @@
     var name = val(addApp, "name");
     if (!name) return fail("add-app-error", "Type the app or file name first.", addApp.elements.name);
     var version = val(addApp, "version");
+    if (!val(addApp, "category")) return fail("add-app-error", "Choose a category.", addApp.querySelector("input[name=category]"));
+    if (!val(addApp, "platform")) return fail("add-app-error", "Choose a platform.", addApp.querySelector("input[name=platform]"));
     var lines = ["Name: " + name];
     if (version) lines.push("Version: " + version);
     lines.push("Category: " + val(addApp, "category"), "Platform: " + val(addApp, "platform"));

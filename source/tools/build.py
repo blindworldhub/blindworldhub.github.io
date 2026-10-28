@@ -1159,8 +1159,11 @@ def search_page():
 def owner_pages():
     """Helper forms for the owner. They open GitHub with everything filled in; only the owner can publish there."""
     repo = CFG["repo"]
-    cat_opts = "".join(f'<option value="{esc(v)}">{esc(v)}</option>' for _, v in CFG["categories"])
-    plat_opts = "".join(f'<option value="{esc(v)}">{esc(v)}</option>' for _, v in CFG["platforms"])
+    # every choice is visible as its own radio button, so nothing is picked by mistake from a closed list
+    cat_opts = "".join(f'<label class="choice choice-row"><input type="radio" name="category" value="{esc(v)}"> {esc(v)}</label>'
+                       for _, v in CFG["categories"])
+    plat_opts = "".join(f'<label class="choice choice-row"><input type="radio" name="platform" value="{esc(v)}"> {esc(v)}</label>'
+                        for _, v in CFG["platforms"])
     admin = page_head("Owner tools", "For Waqas. These pages fill in GitHub for you; only you can publish there.")
     admin += f"""<div class="wrap page-body prose">
 <ul class="tool-list">
@@ -1179,8 +1182,8 @@ def owner_pages():
 <form id="add-app" class="owner-form" data-repo="{esc(repo)}" novalidate>
   <div class="field"><label for="a-name">App or file name (needed)</label><input id="a-name" name="name" required autocomplete="off"></div>
   <div class="field"><label for="a-version">Version, for example 2.1</label><input id="a-version" name="version" autocomplete="off"></div>
-  <div class="field"><label for="a-cat">Category</label><select id="a-cat" name="category">{cat_opts}</select></div>
-  <div class="field"><label for="a-plat">Platform</label><select id="a-plat" name="platform">{plat_opts}</select></div>
+  <fieldset id="a-cat"><legend>Category (choose one)</legend>{cat_opts}</fieldset>
+  <fieldset id="a-plat"><legend>Platform (choose one)</legend>{plat_opts}</fieldset>
   <div class="field"><label for="a-sum">Short description, one sentence</label><input id="a-sum" name="summary" autocomplete="off"></div>
   <div class="field"><label for="a-desc">Full description and features</label><textarea id="a-desc" name="description" rows="6"></textarea></div>
   <div class="field"><label for="a-new">What's new in this version (for app updates; shown in the app's update message)</label><textarea id="a-new" name="whatsnew" rows="3"></textarea></div>
