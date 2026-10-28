@@ -23,7 +23,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/assets/fonts/AtkinsonHyperlegible-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/AtkinsonHyperlegible-Bold.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/site.css?v=202610280526">
+<link rel="stylesheet" href="/assets/css/site.css?v=202610280752">
 <script>(function(){var d=document.documentElement;d.className+=' js';try{var s=localStorage,t=s.getItem('bwh-text');if(t)d.style.setProperty('--scale',t);if(s.getItem('bwh-contrast')==='1')d.setAttribute('data-contrast','high');var th=s.getItem('bwh-theme');if(th)d.setAttribute('data-theme',th);if(s.getItem('bwh-motion')==='0')d.setAttribute('data-motion','off');}catch(e){}})();</script>
 
 </head>
@@ -68,8 +68,8 @@
 <form id="add-app" class="owner-form" data-repo="blindworldhub/blindworldhub.github.io" novalidate>
   <div class="field"><label for="a-name">App or file name (needed)</label><input id="a-name" name="name" required autocomplete="off"></div>
   <div class="field"><label for="a-version">Version, for example 2.1</label><input id="a-version" name="version" autocomplete="off"></div>
-  <div class="field"><label for="a-cat">Category</label><select id="a-cat" name="category"><option value="Screen readers">Screen readers</option><option value="Voices and text to speech">Voices and text to speech</option><option value="Reading and OCR">Reading and OCR</option><option value="Navigation and travel">Navigation and travel</option><option value="Communication">Communication</option><option value="Education">Education</option><option value="Tools and utilities">Tools and utilities</option><option value="Games and entertainment">Games and entertainment</option><option value="Documents and books">Documents and books</option><option value="Other">Other</option></select></div>
-  <div class="field"><label for="a-plat">Platform</label><select id="a-plat" name="platform"><option value="Android">Android</option><option value="Windows">Windows</option><option value="iPhone and iPad">iPhone and iPad</option><option value="Mac">Mac</option><option value="Linux">Linux</option><option value="All devices">All devices</option></select></div>
+  <fieldset id="a-cat"><legend>Category (choose one)</legend><label class="choice choice-row"><input type="radio" name="category" value="Screen readers"> Screen readers</label><label class="choice choice-row"><input type="radio" name="category" value="Voices and text to speech"> Voices and text to speech</label><label class="choice choice-row"><input type="radio" name="category" value="Reading and OCR"> Reading and OCR</label><label class="choice choice-row"><input type="radio" name="category" value="Navigation and travel"> Navigation and travel</label><label class="choice choice-row"><input type="radio" name="category" value="Communication"> Communication</label><label class="choice choice-row"><input type="radio" name="category" value="Education"> Education</label><label class="choice choice-row"><input type="radio" name="category" value="Tools and utilities"> Tools and utilities</label><label class="choice choice-row"><input type="radio" name="category" value="Games and entertainment"> Games and entertainment</label><label class="choice choice-row"><input type="radio" name="category" value="Documents and books"> Documents and books</label><label class="choice choice-row"><input type="radio" name="category" value="Other"> Other</label></fieldset>
+  <fieldset id="a-plat"><legend>Platform (choose one)</legend><label class="choice choice-row"><input type="radio" name="platform" value="Android"> Android</label><label class="choice choice-row"><input type="radio" name="platform" value="Windows"> Windows</label><label class="choice choice-row"><input type="radio" name="platform" value="iPhone and iPad"> iPhone and iPad</label><label class="choice choice-row"><input type="radio" name="platform" value="Mac"> Mac</label><label class="choice choice-row"><input type="radio" name="platform" value="Linux"> Linux</label><label class="choice choice-row"><input type="radio" name="platform" value="All devices"> All devices</label></fieldset>
   <div class="field"><label for="a-sum">Short description, one sentence</label><input id="a-sum" name="summary" autocomplete="off"></div>
   <div class="field"><label for="a-desc">Full description and features</label><textarea id="a-desc" name="description" rows="6"></textarea></div>
   <div class="field"><label for="a-new">What's new in this version (for app updates; shown in the app's update message)</label><textarea id="a-new" name="whatsnew" rows="3"></textarea></div>
@@ -109,7 +109,7 @@
   </div>
   <p class="wrap copyright">Copyright 2026 Blind World Hub. Apps belong to their developers.</p>
 </footer>
-<script src="/assets/js/site.js?v=202610280526" defer></script>
+<script src="/assets/js/site.js?v=202610280752" defer></script>
 
 
 </body>

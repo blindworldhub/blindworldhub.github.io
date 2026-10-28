@@ -270,6 +270,7 @@ button, .btn { cursor: pointer; }
 .owner-form input, .owner-form select, .owner-form textarea { width: 100%; }
 .owner-form fieldset { border: 2px solid var(--line); border-radius: var(--radius-s); margin: 0 0 1rem; padding: 0.6rem 1rem; }
 .choice { display: inline-flex; gap: 0.5rem; align-items: center; margin-right: 1.5rem; min-height: 44px; }
+.choice-row { display: flex; margin-right: 0; }
 .form-error { color: #b3261e; font-weight: 700; min-height: 1.4em; }
 :root[data-theme="dark"] .form-error, :root[data-contrast="high"] .form-error { color: #ffb4ab; }
 .tool-list { list-style: none; padding: 0; display: grid; gap: 1.2rem; }
