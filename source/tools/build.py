@@ -814,12 +814,40 @@ def byline_html(a):
     return f"By {me}" if is_owner_name(au) else f"Written by {esc(au)}, shared by {me}"
 
 
+def article_copy(a, kind):
+    """Copy link for a guide or a news article, as the apps have: shown only when the browser can copy."""
+    folder = "guides" if kind == "guide" else "news"
+    return copy_button({"url": f"/{folder}/{a['slug']}/", "name": a["title"]})
+
+
 def article_row(a, kind, level=3):
     folder = "guides" if kind == "guide" else "news"
     return f"""<li class="article-row">
   <h{level}><a href="/{folder}/{a['slug']}/">{esc(a['title'])}</a></h{level}>
   <p>{esc(a['description'])}</p>
   <p class="meta"><time datetime="{a['date']:%Y-%m-%d}">{fmt_date(a['date'])}</time>, {byline_text(a)}.</p>
+  <p class="row-actions">{article_copy(a, kind)}</p>
+</li>"""
+
+
+def latest_row(item, level=3):
+    """One row of the home page's Latest list: an app, a news article or a guide, newest first. Each reads the same
+    way: its title as a heading, then what it is and its date, a short description, and its buttons."""
+    kind, a = item["kind"], item["a"]
+    if kind == "app":
+        title, url, what, desc = a["name"], a["url"], "App", a["summary"]
+        actions = row_actions(a)
+        who = f"uploaded by {esc(CFG['uploader'])}"
+    else:
+        folder = "guides" if kind == "guide" else "news"
+        title, url, what, desc = a["title"], f"/{folder}/{a['slug']}/", ("News" if kind == "news" else "Guide"), a["description"]
+        actions = f'<p class="row-actions">{article_copy(a, kind)}</p>'
+        who = byline_text(a)
+    return f"""<li class="article-row latest-row">
+  <h{level}><a href="{url}">{esc(title)}</a></h{level}>
+  <p class="meta">{what}, <time datetime="{item['date']:%Y-%m-%d}">{fmt_date(item['date'])}</time>, {who}.</p>
+  <p>{esc(desc)}</p>
+  {actions}
 </li>"""
 
 
@@ -849,10 +877,24 @@ def home(apps, videos, arts):
   </div>
 </section>"""
     parts = [hero]
+    # Whatever was put on the site last comes first: apps, news and guides together, newest at the top.
+    items = [{"kind": "app", "date": a["updated"], "a": a} for a in apps]
+    items += [{"kind": "news", "date": a["date"], "a": a} for a in arts["news"]]
+    items += [{"kind": "guide", "date": a["date"], "a": a} for a in arts["guide"]]
+    items.sort(key=lambda i: i["date"], reverse=True)
+    latest = items[:int(CFG.get("latestItems", 8))]
+    parts.append(f"""<section class="band" aria-labelledby="latest">
+  <div class="wrap">
+    <div class="band-head"><h2 id="latest">Latest on Blind World Hub</h2></div>
+    <p class="meta">Apps, news and guides, the newest first.</p>
+    {('<ul class="article-list latest-list">' + ''.join(latest_row(i) for i in latest) + '</ul>') if latest else empty_note("The first apps are on their way. To hear as soon as they arrive,", '<a href="' + esc(CFG["whatsapp"]) + '">join the WhatsApp community</a>.')}
+    <p class="more-links"><a href="/apps/">All apps</a> <a href="/news/">All news</a> <a href="/guides/">All guides</a></p>
+  </div>
+</section>""")
     parts.append(f"""<section class="band" aria-labelledby="new-apps">
   <div class="wrap">
     <div class="band-head"><h2 id="new-apps">New apps</h2><a class="more" href="/apps/">See all apps</a></div>
-    {('<ul class="app-list">' + ''.join(app_row(a) for a in recent) + '</ul>') if recent else empty_note("The first apps are on their way. To hear as soon as they arrive,", '<a href="' + esc(CFG["whatsapp"]) + '">join the WhatsApp community</a>.')}
+    {('<ul class="app-list">' + ''.join(app_row(a) for a in recent) + '</ul>') if recent else empty_note("The first apps are on their way.")}
   </div>
 </section>""")
     if popular:
@@ -1114,7 +1156,8 @@ def articles_pages(arts):
             cr, ld_c = crumbs([("/", "Home"), (f"/{folder}/", label), (None, a["title"])])
             body = f"""<article>
 <div class="page-head"><div class="wrap">{cr}<h1>{esc(a['title'])}</h1>
-<p class="meta">{byline_html(a)}, <time datetime="{a['date']:%Y-%m-%d}">{fmt_date(a['date'])}</time>.</p></div></div>
+<p class="meta">{byline_html(a)}, <time datetime="{a['date']:%Y-%m-%d}">{fmt_date(a['date'])}</time>.</p>
+<p class="row-actions">{article_copy(a, kind)}</p></div></div>
 <div class="wrap page-body prose">{markdown(a['body'])}
 <p class="back"><a href="/{folder}/">All {label.lower()}</a></p></div>
 </article>"""
