@@ -208,10 +208,41 @@
     if (whatsnew) lines.push("Whats new: " + whatsnew.replace(/\n+/g, " "));
     var body = lines.join("\n") + "\n\n" + val(addApp, "description");
     var tag = slug(name) + (version ? "-" + slug(version) : "") + "-" + stamp();
-    var url = "https://github.com/" + addApp.getAttribute("data-repo") + "/releases/new?tag=" + encodeURIComponent(tag) +
-      "&title=" + encodeURIComponent((name + " " + version).trim()) + "&body=" + encodeURIComponent(body);
-    location.href = url;
+    var base = "https://github.com/" + addApp.getAttribute("data-repo") + "/releases/new?tag=" + encodeURIComponent(tag) +
+      "&title=" + encodeURIComponent((name + " " + version).trim());
+    var url = base + "&body=" + encodeURIComponent(body);
+    if (url.length <= LINK_MAX) { location.href = url; return; }
+    // GitHub refuses a link that is too long (with a long description and What's new it failed at about 6,700
+    // letters, and the browser's GitHub cookies count too). Then the text is copied, and GitHub opens with the tag
+    // and the title only: the person pastes the text once.
+    var err = document.getElementById("add-app-error");
+    var old = document.getElementById("add-app-long");
+    if (old) old.parentNode.removeChild(old);
+    var box = document.createElement("div");
+    box.id = "add-app-long";
+    function show(copied) {
+      var p = document.createElement("p");
+      p.textContent = copied
+        ? "The text is too long for one GitHub link, so it is copied for you. Press Open GitHub. There, paste it into the big text box Describe this release, attach the file and press Publish release."
+        : "The text is too long for one GitHub link. Copy all the text in the box below, then press Open GitHub. There, paste it into the big text box Describe this release, attach the file and press Publish release.";
+      box.appendChild(p);
+      if (!copied) {
+        var ta = document.createElement("textarea");
+        ta.readOnly = true; ta.rows = 6; ta.value = body;
+        ta.setAttribute("aria-label", "The text to paste on GitHub");
+        box.appendChild(ta);
+      }
+      var a = document.createElement("a");
+      a.className = "btn btn-primary"; a.href = base; a.textContent = "Open GitHub";
+      box.appendChild(a);
+      err.textContent = "";
+      err.parentNode.insertBefore(box, err.nextSibling);
+      p.tabIndex = -1;                       // the screen reader reads the message first; Open GitHub comes next
+      p.focus();
+    }
+    copyText(body).then(function () { show(true); }, function () { show(false); });
   });
+  var LINK_MAX = 4000;
 
   var write = $("#write-article");
   if (write) write.addEventListener("submit", function (ev) {
