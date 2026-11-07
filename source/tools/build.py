@@ -835,9 +835,9 @@ def latest_row(item, level=3):
     way: its title as a heading, then what it is and its date, a short description, and its buttons."""
     kind, a = item["kind"], item["a"]
     if kind == "app":
-        title, url, what, desc = a["name"], a["url"], "App", a["summary"]
-        actions = row_actions(a)
-        who = f"uploaded by {esc(CFG['uploader'])}"
+        # An app reads here exactly as in the New apps list and on its own page: name, version, uploaded by, date,
+        # short description, the long description, copy link, download, and how many times it was downloaded.
+        return app_row(a, level)
     else:
         folder = "guides" if kind == "guide" else "news"
         title, url, what, desc = a["title"], f"/{folder}/{a['slug']}/", ("News" if kind == "news" else "Guide"), a["description"]
