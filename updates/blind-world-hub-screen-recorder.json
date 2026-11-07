@@ -1,13 +1,13 @@
 {
  "name": "Blind World Hub Screen Recorder",
- "version": "1.0",
- "fileId": 704958209,
- "versionCode": 1,
- "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/blind-world-hub-screen-recorder-1-0-20261103-1357/BlindWorldHubScreenRecorder-1.0-build6.apk",
- "size": 50656,
- "sha256": "701246249efd58a590af04c026e7793ef9e7091b2e837d0df03379082fd9fba5",
- "date": "2026-11-03",
+ "version": "1.1",
+ "fileId": 720181202,
+ "versionCode": 3,
+ "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/blind-world-hub-screen-recorder-1-1-20261107-1358/BlindWorldHubScreenRecorder.1.apk",
+ "size": 5650189,
+ "sha256": "61c646eacc92be0db2f571b8e8f93b04d21b75d7a48276c92810541ea2aa175c",
+ "date": "2026-11-07",
  "page": "https://blindworldhub.github.io/apps/blind-world-hub-screen-recorder/",
- "summary": "An accessible screen recorder for blind and visually impaired people: every button speaks, the countdown is spoken and felt, and your voice and the screen reader can be recorded together.",
- "whatsNew": ""
+ "summary": "An accessible screen recorder for blind and visually impaired people, now with background music that gets softer by itself whenever you or your screen reader speaks.",
+ "whatsNew": "What's new in version 1.1: background music Add background music to your recordings. Choose any song or music file from your phone, and it plays softly under your recording. Music volume: set how loud the music is, from silent to louder than normal. Music softer and Music louder: change the music's volume while you are recording. The music gets softer when someone speaks: when you or your screen reader speaks, the music goes down by itself and comes back up in the pauses, like on FM radio. Choose a ready-made style: FM radio: goes down at once and comes back up in half a second (recommended) YouTube tutorial: goes down a little deeper and comes back up in about one and a half seconds Soft and relaxed: goes down deep and comes back up slowly Like GoldWave: waits for a real pause of 3 seconds before coming back up Silent while someone speaks My own settings: choose how much softer, how fast it goes down, how long it waits and how fast it comes back up Off: the music never gets softer Voice sensitivity: decides how loud the speaking must be before the music goes down. High works for soft voices in a quiet room, Medium suits most people, and Low suits noisy places, so fans and traffic do not lower the music. A louder voice lowers the music a little more: the louder you speak, the softer the music goes, so it sounds natural. Clear space for the voice: only the part of the music where voices sit goes down, so the music stays full and your voice stays clear. Every song at about the same loudness: loud songs and quiet songs are brought to a similar volume, so every video sounds even. Music comes in and goes out softly: the music rises gently over 2 seconds at the start and fades out at the end, instead of starting or stopping suddenly. Background music in Make video: add music to a recording you already made, with the same options."
 }
