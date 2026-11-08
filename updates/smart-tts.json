@@ -1,13 +1,13 @@
 {
  "name": "Smart TTS",
- "version": "1.3",
- "fileId": 708450630,
- "versionCode": 26,
- "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/smart-tts-1-3-20261104-1111/Smart.TTS.apk",
- "size": 70807124,
- "sha256": "80b7ace9c476b64e980da5ec8de92f16678c556ba5c479f5033a41653a9ca6dc",
- "date": "2026-11-04",
+ "version": "1.4",
+ "fileId": 722999270,
+ "versionCode": 28,
+ "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/smart-tts-1-4-20261108-1028/Smart.TTS.apk",
+ "size": 70843912,
+ "sha256": "c780518aa1c52095f12eeddaf6e2cb458f686f733e3544d1829f5b544672d522",
+ "date": "2026-11-08",
  "page": "https://blindworldhub.github.io/apps/smart-tts/",
- "summary": "A multilingual text-to-speech engine for screen reader users: every language is read in its own voice, automatically, with a fast built-in English voice and many reading options.",
- "whatsNew": "What's new in Smart TTS 1.3 - 205 languages on the Languages page. - Make audio file: its own speed, 0.5x to 4x. - NEW: Read and copy codes from SMS: the code is copied and said slowly, twice, wherever you are. - Reed: Phrase prediction, Backquote voice tags, Sound profile and Voice shape (head size, roughness, breathiness, pitch fluctuation, gender). - Reading: short web links, counted repeated signs, split joined words, Roman numerals as numbers, no repeated typed letters. - Numbers: codes digit by digit, Urdu and Hindi numbers in words, lakh and crore, date order. - Sound: Audio optimization, Audio routing, Low latency mode. - Keep voices running: shortcuts for battery, auto start and never pausing the app."
+ "summary": "A smart text to speech engine for blind people: Urdu, Hindi and English in the right voice, built-in Reed voice, backup voices, and now settings for each app.",
+ "whatsNew": "What's new in version 1.4 - Fixed: Google Play Protect no longer warns about Smart TTS - New: Backup and restore your settings and dictionary - New: Dash between numbers, read as \"to\", \"minus\", \"dash\" or a short pause - New: Hold the phone to your ear to hear speech privately - New: Keep speech on the phone while Bluetooth audio is connected - New: Shake the phone twice to copy what was just said - New: Settings for each app, with its own speed, pitch, volume and voice"
 }
