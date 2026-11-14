@@ -19,6 +19,7 @@
   },
   "categories": [
     ["screen-readers", "Screen readers"],
+    ["extensions", "Screen reader extensions and tools"],
     ["voices", "Voices and text to speech"],
     ["reading", "Reading and OCR"],
     ["navigation", "Navigation and travel"],

@@ -415,7 +415,7 @@ def match_key(value, table, default):
 def platform_from_files(assets):
     ext = {".apk": "android", ".apks": "android", ".xapk": "android", ".aab": "android", ".exe": "windows",
            ".msi": "windows", ".dmg": "mac", ".pkg": "mac", ".ipa": "ios", ".deb": "linux", ".appimage": "linux",
-           ".pdf": "all", ".epub": "all", ".mp3": "all", ".docx": "all", ".txt": "all"}
+           ".nvda-addon": "windows", ".pdf": "all", ".epub": "all", ".mp3": "all", ".docx": "all", ".txt": "all"}
     for a in assets:
         e = os.path.splitext(a["name"].lower())[1]
         if e in ext:
@@ -427,7 +427,7 @@ def file_kind(name):
     e = os.path.splitext(name.lower())[1].lstrip(".")
     return {"apk": "APK file", "apks": "APKS file", "xapk": "XAPK file", "exe": "Windows installer",
             "msi": "Windows installer", "zip": "ZIP file", "pdf": "PDF document", "epub": "EPUB book",
-            "mp3": "MP3 audio", "dmg": "Mac disk image", "ipa": "iPhone app"}.get(e, (e.upper() + " file") if e else "file")
+            "mp3": "MP3 audio", "dmg": "Mac disk image", "ipa": "iPhone app", "nvda-addon": "NVDA add-on"}.get(e, (e.upper() + " file") if e else "file")
 
 
 def build_apps(releases):
