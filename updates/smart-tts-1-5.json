@@ -1,0 +1,13 @@
+{
+ "name": "Smart TTS 1.5",
+ "version": "1.5",
+ "fileId": 749816340,
+ "versionCode": 33,
+ "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/smart-tts-1-5-1-5-20261115-0926/SmartTTS.apk",
+ "size": 70860296,
+ "sha256": "238d8ebb239160793fdefdbc6e08b6792f090239105b4119797f62ae5796e3b8",
+ "date": "2026-11-15",
+ "page": "https://blindworldhub.github.io/apps/smart-tts-1-5/",
+ "summary": "Smart TTS 1.5 adds Call Announcer and Payment Announcer: hear who is calling and who sent or received money. It also reads mixed-language text better, with each word in its own voice.",
+ "whatsNew": "What's New in Smart TTS 1.5: This update introduces two new features, Call Announcer and Payment Announcer. Call Announcer speaks the caller's name, or the number digit by digit, when a call comes in. Payment Announcer tells you the amount and the name when money is sent or received. You can choose a separate language for calls and for payments. A new option, \"Lower the ringtone while the caller is said\", makes the ringtone quieter while the caller is announced, so you can hear the name clearly. This update also fixes reading of texts that mix languages written in the same script: each word is now read by the voice of its own language."
+}
