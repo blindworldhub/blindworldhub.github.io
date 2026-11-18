@@ -1,0 +1,13 @@
+{
+ "name": "Smart TTS 1.6",
+ "version": "1.6",
+ "fileId": 761900939,
+ "versionCode": 36,
+ "url": "https://github.com/blindworldhub/blindworldhub.github.io/releases/download/smart-tts-1-6-1-6-20261118-0929/SmartTTS.apk",
+ "size": 70878628,
+ "sha256": "2c2b161075d0660f6428902ba8b69b1bc5a8d369642891de5a31f778592618f7",
+ "date": "2026-11-18",
+ "page": "https://blindworldhub.github.io/apps/smart-tts-1-6/",
+ "summary": "Smart TTS 1.6 makes Call Announcer more reliable for phone and WhatsApp calls, even with the screen off, fixes Payment Announcer, and keeps speech on the phone's speaker while music plays on Bluetooth.",
+ "whatsNew": "What's New in Smart TTS 1.6: Call announcer improved: incoming phone calls and WhatsApp calls are now announced reliably with the caller's name or number, even when the screen is off. Payment announcements fixed and more reliable. Bluetooth speaker issue fixed: while music or video plays on Bluetooth, speech now comes from the phone's speaker, and when nothing is playing it returns to Bluetooth. Plus general stability improvements."
+}
