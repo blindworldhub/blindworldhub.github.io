@@ -66,10 +66,6 @@ Before a report is sent, the spoken text, names, long numbers and e-mail address
 
 Smart TTS does not read your SMS, your files, your photos or your location, and it does not use the microphone.
 
-## The version from the Blind World Hub website
-
-The version of Smart TTS on this website (not the one on Google Play) also checks the Blind World Hub server and this website for new versions, can download a new version for you to install, and can join beta testing when you enter an invite code. These checks send only the app name and version.
-
 ## Children
 
 Smart TTS is not made for children under 13 and does not knowingly collect data from them.
