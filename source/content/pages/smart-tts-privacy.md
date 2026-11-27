@@ -8,7 +8,7 @@ Smart TTS is a speech app for blind and visually impaired people, made by Muhamm
 ## The short version
 
 - Smart TTS never sends the text it reads aloud to the internet.
-- Smart TTS has no account, no sign up, no advertising and no analytics.
+- Smart TTS has no account, no sign up, no advertising and no tracking.
 - I never sell or share your data with anyone.
 - A problem report or a log leaves your phone only when you agree to it or send it yourself.
 
