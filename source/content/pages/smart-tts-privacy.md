@@ -54,7 +54,7 @@ Before a report is sent, the spoken text, names, long numbers and e-mail address
 
 ## Log for help
 
-"Keep a log for help" is off until you turn it on. The log stays on your phone. You decide what happens with it: share it, save it, or send it to me. If you send it, it is used only to help you, and only I can read it. You can delete the log at any time from the app.
+"Keep a log for help" is off until you turn it on. The log stays on your phone. You decide what happens with it: share it, save it, or send it to me. When you send it to me, you can choose to include the recording of what Smart TTS said (the sound log), and, only when you tick Include spoken text, the words that were spoken. If you send it, it is used only to help you, and only I can read it. You can delete the log at any time from the app.
 
 ## Permissions
 
