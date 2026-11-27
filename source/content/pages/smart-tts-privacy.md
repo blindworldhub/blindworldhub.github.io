@@ -7,14 +7,14 @@ Smart TTS is a speech app for blind and visually impaired people, made by Muhamm
 
 ## The short version
 
-- Everything Smart TTS reads aloud is turned into speech on your phone.
+- Smart TTS never sends the text it reads aloud to the internet.
 - Smart TTS has no account, no sign up, no advertising and no analytics.
 - I never sell or share your data with anyone.
 - A problem report or a log leaves your phone only when you agree to it or send it yourself.
 
 ## Speech
 
-Smart TTS works as a speech engine for your screen reader and other apps. The text it reads is spoken by the voice engines installed on your phone, such as Speech Services by Google. Smart TTS does not send that text anywhere. Those voice engines are separate apps, and their own privacy policies apply to them.
+Smart TTS works as a speech engine for your screen reader and other apps. The text it reads is spoken by the voice engines installed on your phone, such as Speech Services by Google. Smart TTS does not send that text anywhere. Those voice engines are separate apps; some of them can use online voices, and their own privacy policies apply to them.
 
 To make speech start faster, Smart TTS can keep the sound of a few words ready for a short time. This stays in the phone's memory only, is never saved and is never sent.
 
